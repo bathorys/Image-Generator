@@ -1,8 +1,8 @@
 // 메인 애플리케이션
-import { ImageProcessor } from './modules/imageProcessor.js';
-import { CropManager } from './modules/cropManager.js';
-import { FileUploader } from './modules/fileUploader.js';
-import { UIManager } from './modules/uiManager.js';
+import { ImageProcessor } from '/Image-Generator/js/modules/imageProcessor.js';
+import { CropManager } from '/Image-Generator/js/modules/cropManager.js';
+import { FileUploader } from '/Image-Generator/js/modules/fileUploader.js';
+import { UIManager } from '/Image-Generator/js/modules/uiManager.js';
 
 export class ImageGeneratorApp {
   constructor() {

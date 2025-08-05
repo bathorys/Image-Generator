@@ -118,7 +118,63 @@ updateButtonStates() {
 }
 ```
 
+### 쿠키 기반 설정 저장 구현
+```javascript
+// CookieStore API를 사용한 설정 저장
+async saveCurrentSettings() {
+  const settings = {
+    format: elements.formatSelect.value,
+    jpegQuality: parseInt(elements.jpegQualitySlider.value),
+    pngCompression: parseInt(elements.pngCompressionSlider.value),
+    webpQuality: parseInt(elements.webpQualitySlider.value),
+    webpTransparency: elements.webpTransparency.checked,
+    maxWidth: elements.maxWidth.value,
+    maxHeight: elements.maxHeight.value,
+    sizeOptions: {
+      size1x: elements.size1x ? elements.size1x.checked : true,
+      size2x: elements.size2x ? elements.size2x.checked : false,
+      size3x: elements.size3x ? elements.size3x.checked : false
+    }
+  };
+  
+  await this.cookieManager.saveSettings(settings);
+}
+
+// 자동 설정 복원
+async loadSavedSettings() {
+  const savedSettings = await this.cookieManager.loadSettings();
+  if (savedSettings) {
+    // 저장된 설정을 UI에 적용
+    elements.formatSelect.value = savedSettings.format;
+    elements.jpegQualitySlider.value = savedSettings.jpegQuality;
+    // ... 기타 설정들
+  }
+}
+```
+
+## 브라우저 지원 기준 (Baseline)
+
+### 최소 지원 브라우저
+- **Chrome**: 87+ (2020년 11월 이후)
+- **Edge**: 87+ (2020년 11월 이후)
+- **Firefox**: 103+ (2022년 7월 이후)
+- **Safari**: 16+ (2022년 9월 이후)
+- **Opera**: 73+ (2020년 11월 이후)
+
+### 지원 정책
+1. **최신 기술 우선**: 최신 브라우저에서 최적의 경험 제공
+2. **점진적 개선**: 새로운 API 기능을 적극 활용
+3. **넓은 호환성**: 2020년 이후 브라우저 대부분 지원
+4. **성능 최적화**: 최신 브라우저의 성능 최적화 기능 활용
+
 ## 예정 기능
+### ✅ 쿠키 기반 설정 저장 기능
+- **CookieStore API 사용**: 최신 브라우저 API로 안전하고 빠른 쿠키 관리 (Chrome 87+, Firefox 103+, Safari 16+)
+- **자동 설정 저장**: 사용자가 설정을 변경할 때마다 자동 저장
+- **자동 설정 복원**: 페이지 로드 시 이전 설정 자동 복원
+- **수동 설정 관리**: 설정 저장/불러오기/삭제 버튼 제공
+- **30일간 유지**: 설정이 30일간 브라우저에 저장됨
+
 ### 향후 개선 사항
 - [ ] 이미지 회전 기능
 - [ ] 이미지 필터 적용 (밝기, 대비, 채도 등)

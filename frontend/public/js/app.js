@@ -3,6 +3,7 @@ import { ImageProcessor } from '/Image-Generator/js/modules/imageProcessor.js';
 import { CropManager } from '/Image-Generator/js/modules/cropManager.js';
 import { FileUploader } from '/Image-Generator/js/modules/fileUploader.js';
 import { UIManager } from '/Image-Generator/js/modules/uiManager.js';
+import { CookieManager } from '/Image-Generator/js/modules/cookieManager.js';
 
 export class ImageGeneratorApp {
   constructor() {
@@ -10,15 +11,19 @@ export class ImageGeneratorApp {
     this.cropManager = new CropManager();
     this.fileUploader = new FileUploader();
     this.uiManager = new UIManager();
+    this.cookieManager = new CookieManager();
     this.processedBlob = null;
   }
 
-  // 애플리케이션 초기화
-  init() {
+      // 애플리케이션 초기화
+  async init() {
     this.uiManager.initializeElements();
     this.bindEvents();
     this.initMagnifier();
     this.initFormatControls();
+
+    // 저장된 설정 불러오기
+    await this.loadSavedSettings();
 
     // 초기 버튼 상태 설정
     this.updateButtonStates();
@@ -45,6 +50,11 @@ export class ImageGeneratorApp {
     elements.resetImageBtn.addEventListener('click', () => this.resetImage());
     elements.resetBtn.addEventListener('click', () => this.resetApp());
 
+    // 설정 관련 버튼 이벤트
+    elements.saveSettingsBtn.addEventListener('click', () => this.saveSettingsManually());
+    elements.loadSettingsBtn.addEventListener('click', () => this.loadSavedSettings());
+    elements.clearSettingsBtn.addEventListener('click', () => this.clearSettings());
+
     // 크롭 관련 이벤트
     elements.applyCropBtn.addEventListener('click', () => this.applyCrop());
     elements.cancelCropBtn.addEventListener('click', () => this.cancelCrop());
@@ -58,20 +68,77 @@ export class ImageGeneratorApp {
     const elements = this.uiManager.getElements();
 
     // 형식 선택 이벤트
-    elements.formatSelect.addEventListener('change', () => this.updateFormatControls());
+    elements.formatSelect.addEventListener('change', () => {
+      this.updateFormatControls();
+      this.saveCurrentSettings().catch(error => {
+        console.error('설정 자동 저장 실패:', error);
+      }); // 자동 저장 (알림 없음)
+    });
 
     // 슬라이더 이벤트
     elements.jpegQualitySlider.addEventListener('input', () => {
       elements.jpegQualityValue.textContent = elements.jpegQualitySlider.value + '%';
+      this.saveCurrentSettings().catch(error => {
+        console.error('설정 자동 저장 실패:', error);
+      });
     });
 
     elements.pngCompressionSlider.addEventListener('input', () => {
       elements.pngCompressionValue.textContent = elements.pngCompressionSlider.value;
+      this.saveCurrentSettings().catch(error => {
+        console.error('설정 자동 저장 실패:', error);
+      });
     });
 
     elements.webpQualitySlider.addEventListener('input', () => {
       elements.webpQualityValue.textContent = elements.webpQualitySlider.value + '%';
+      this.saveCurrentSettings().catch(error => {
+        console.error('설정 자동 저장 실패:', error);
+      });
     });
+
+    // WebP 투명도 이벤트
+    elements.webpTransparency.addEventListener('change', () => {
+      this.saveCurrentSettings().catch(error => {
+        console.error('설정 자동 저장 실패:', error);
+      });
+    });
+
+    // 최대 크기 입력 이벤트
+    elements.maxWidth.addEventListener('input', () => {
+      this.saveCurrentSettings().catch(error => {
+        console.error('설정 자동 저장 실패:', error);
+      });
+    });
+
+    elements.maxHeight.addEventListener('input', () => {
+      this.saveCurrentSettings().catch(error => {
+        console.error('설정 자동 저장 실패:', error);
+      });
+    });
+
+    // 사이즈 옵션 이벤트
+    if (elements.size1x) {
+      elements.size1x.addEventListener('change', () => {
+        this.saveCurrentSettings().catch(error => {
+          console.error('설정 자동 저장 실패:', error);
+        });
+      });
+    }
+    if (elements.size2x) {
+      elements.size2x.addEventListener('change', () => {
+        this.saveCurrentSettings().catch(error => {
+          console.error('설정 자동 저장 실패:', error);
+        });
+      });
+    }
+    if (elements.size3x) {
+      elements.size3x.addEventListener('change', () => {
+        this.saveCurrentSettings().catch(error => {
+          console.error('설정 자동 저장 실패:', error);
+        });
+      });
+    }
 
     // 초기 상태 설정
     this.updateFormatControls();
@@ -695,21 +762,131 @@ export class ImageGeneratorApp {
 
     // 이미지만 초기화 (설정은 유지)
   resetImage() {
-    this.fileUploader.reset();
+    // 원본 파일과 이미지 소스를 보존
+    const originalFile = this.fileUploader.getOriginalFile();
+    const originalImageSrc = this.uiManager.getElements().originalImage.src;
+
+    // 처리된 이미지만 초기화
     this.processedBlob = null;
     this.cropManager.cancelCrop(this.uiManager.getElement('cropOverlay'));
     this.uiManager.resetImage();
 
-    // 크롭 버튼 텍스트 업데이트
-    this.updateCropButtonText();
+    // 처리된 이미지를 원본 이미지로 복원
+    if (originalImageSrc && originalImageSrc !== '') {
+      this.uiManager.getElements().processedImage.src = originalImageSrc;
+    }
+
+    // 버튼 상태 업데이트 (원본 이미지는 유지되므로 크롭 버튼 활성화)
+    this.updateButtonStates();
   }
 
-  // 앱 리셋 (모든 설정 포함)
-  resetApp() {
+      // 현재 설정 저장
+  async saveCurrentSettings() {
+    const elements = this.uiManager.getElements();
+    const settings = {
+      format: elements.formatSelect.value,
+      jpegQuality: parseInt(elements.jpegQualitySlider.value),
+      pngCompression: parseInt(elements.pngCompressionSlider.value),
+      webpQuality: parseInt(elements.webpQualitySlider.value),
+      webpTransparency: elements.webpTransparency.checked,
+      maxWidth: elements.maxWidth.value,
+      maxHeight: elements.maxHeight.value,
+      sizeOptions: {
+        size1x: elements.size1x ? elements.size1x.checked : true,
+        size2x: elements.size2x ? elements.size2x.checked : false,
+        size3x: elements.size3x ? elements.size3x.checked : false
+      }
+    };
+
+    await this.cookieManager.saveSettings(settings);
+  }
+
+  // 수동 설정 저장 (사용자 버튼 클릭 시)
+  async saveSettingsManually() {
+    await this.saveCurrentSettings();
+    this.uiManager.showAlert('설정이 저장되었습니다.');
+  }
+
+  // 저장된 설정 불러오기
+  async loadSavedSettings() {
+    const savedSettings = await this.cookieManager.loadSettings();
+    if (!savedSettings) {
+      this.uiManager.showAlert('저장된 설정이 없습니다.');
+      return; // 저장된 설정이 없으면 기본값 사용
+    }
+
+    const elements = this.uiManager.getElements();
+
+    // 형식 설정
+    if (savedSettings.format) {
+      elements.formatSelect.value = savedSettings.format;
+      this.updateFormatControls();
+    }
+
+    // JPEG 품질 설정
+    if (savedSettings.jpegQuality) {
+      elements.jpegQualitySlider.value = savedSettings.jpegQuality;
+      elements.jpegQualityValue.textContent = savedSettings.jpegQuality + '%';
+    }
+
+    // PNG 압축 설정
+    if (savedSettings.pngCompression !== undefined) {
+      elements.pngCompressionSlider.value = savedSettings.pngCompression;
+      elements.pngCompressionValue.textContent = savedSettings.pngCompression;
+    }
+
+    // WebP 품질 설정
+    if (savedSettings.webpQuality) {
+      elements.webpQualitySlider.value = savedSettings.webpQuality;
+      elements.webpQualityValue.textContent = savedSettings.webpQuality + '%';
+    }
+
+    // WebP 투명도 설정
+    if (savedSettings.webpTransparency !== undefined) {
+      elements.webpTransparency.checked = savedSettings.webpTransparency;
+    }
+
+    // 최대 크기 설정
+    if (savedSettings.maxWidth !== undefined) {
+      elements.maxWidth.value = savedSettings.maxWidth;
+    }
+    if (savedSettings.maxHeight !== undefined) {
+      elements.maxHeight.value = savedSettings.maxHeight;
+    }
+
+    // 사이즈 옵션 설정
+    if (savedSettings.sizeOptions) {
+      if (elements.size1x && savedSettings.sizeOptions.size1x !== undefined) {
+        elements.size1x.checked = savedSettings.sizeOptions.size1x;
+      }
+      if (elements.size2x && savedSettings.sizeOptions.size2x !== undefined) {
+        elements.size2x.checked = savedSettings.sizeOptions.size2x;
+      }
+      if (elements.size3x && savedSettings.sizeOptions.size3x !== undefined) {
+        elements.size3x.checked = savedSettings.sizeOptions.size3x;
+      }
+    }
+
+    this.uiManager.showAlert('설정을 불러왔습니다.');
+  }
+
+  // 설정 삭제
+  async clearSettings() {
+    if (confirm('저장된 설정을 삭제하시겠습니까?')) {
+      await this.cookieManager.clearSettings();
+      this.uiManager.showAlert('설정이 삭제되었습니다.');
+    }
+  }
+
+    // 앱 리셋 (모든 설정 포함)
+  async resetApp() {
     this.fileUploader.reset();
     this.processedBlob = null;
     this.cropManager.cancelCrop(this.uiManager.getElement('cropOverlay'));
     this.uiManager.resetApp();
+
+    // 저장된 설정도 삭제
+    await this.cookieManager.clearSettings();
 
     // 크롭 버튼 텍스트 업데이트
     this.updateCropButtonText();
@@ -717,7 +894,7 @@ export class ImageGeneratorApp {
 }
 
 // 애플리케이션 초기화
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const app = new ImageGeneratorApp();
-  app.init();
+  await app.init();
 });

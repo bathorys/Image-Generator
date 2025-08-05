@@ -63,4 +63,29 @@
       background: darken($danger-color, 10%);
     }
   }
+
+  &-info {
+    background: $info-color;
+    color: white;
+
+    &:hover {
+      background: darken($info-color, 10%);
+    }
+  }
+}
+
+// 설정 액션 버튼 컨테이너
+.settings-actions {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid $border-light;
+  display: flex;
+  gap: $spacing-sm;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  .btn {
+    font-size: $font-size-sm;
+    padding: $spacing-xs $spacing-sm;
+  }
 }

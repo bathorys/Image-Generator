@@ -54,6 +54,9 @@ export class UIManager {
       downloadBtn: document.getElementById('downloadBtn'),
       resetImageBtn: document.getElementById('resetImageBtn'),
       resetBtn: document.getElementById('resetBtn'),
+      saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+      loadSettingsBtn: document.getElementById('loadSettingsBtn'),
+      clearSettingsBtn: document.getElementById('clearSettingsBtn'),
       cropSection: document.getElementById('cropSection'),
       cropImage: document.getElementById('cropImage'),
       cropOverlay: document.getElementById('cropOverlay'),
@@ -95,12 +98,12 @@ export class UIManager {
 
   // 이미지만 초기화 (설정은 유지)
   resetImage() {
-    this.elements.originalImage.src = '';
+    // 원본 이미지는 유지하고, 처리된 이미지만 초기화
     this.elements.processedImage.src = '';
     this.elements.cropSection.style.display = 'none';
 
-    // 이미지 정보 초기화
-    this.resetImageInfo();
+    // 처리된 이미지 정보만 초기화
+    this.resetProcessedImageInfo();
 
     // 사이즈 옵션 숨기기
     this.hideSizeOptions();
@@ -170,6 +173,14 @@ export class UIManager {
     this.elements.originalFileSize.textContent = '-';
     this.elements.originalImageSize.textContent = '-';
     this.elements.originalFormat.textContent = '-';
+    this.elements.processedFileSize.textContent = '-';
+    this.elements.processedImageSize.textContent = '-';
+    this.elements.processedFormat.textContent = '-';
+    this.elements.compressionInfo.style.display = 'none';
+  }
+
+  // 처리된 이미지 정보만 초기화
+  resetProcessedImageInfo() {
     this.elements.processedFileSize.textContent = '-';
     this.elements.processedImageSize.textContent = '-';
     this.elements.processedFormat.textContent = '-';

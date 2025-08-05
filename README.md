@@ -14,12 +14,43 @@
 - **사이즈 별 저장**: @x1, @x2, @x3 크기로 다운로드
 - **스마트한 버튼 관리**: 상황에 따른 자동 활성화/비활성화
 - **유연한 초기화**: 이미지 초기화와 완전 초기화 분리
+- **설정 자동 저장**: CookieStore API를 사용한 설정 자동 저장/복원
 
 ## 🛠️ 기술 스택
 
 - **Frontend**: Astro, SCSS, JavaScript (ES6+)
 - **Build Tool**: Vite
 - **Package Manager**: npm
+
+## 🌐 브라우저 지원 (Baseline)
+
+### 최소 지원 브라우저
+이 프로젝트는 **최신 기술을 우선**하되, **최대한 많은 사용자**를 지원하는 것을 목표로 합니다.
+
+#### ✅ 지원 브라우저
+- **Chrome**: 87+ (2020년 11월 이후)
+- **Edge**: 87+ (2020년 11월 이후)
+- **Firefox**: 103+ (2022년 7월 이후)
+- **Safari**: 16+ (2022년 9월 이후)
+- **Opera**: 73+ (2020년 11월 이후)
+
+#### 📊 지원 현황
+- **전 세계 사용률**: 약 95% 이상
+- **한국 사용률**: 약 98% 이상
+- **모바일 브라우저**: iOS Safari 16+, Android Chrome 87+
+
+#### 🚀 사용하는 최신 기술
+- **CookieStore API**: 쿠키 관리 (Chrome 87+, Firefox 103+, Safari 16+)
+- **ES6+ 모듈**: JavaScript 모듈 시스템
+- **CSS Grid & Flexbox**: 현대적 레이아웃
+- **CSS Custom Properties**: CSS 변수
+- **Promise 기반 비동기 처리**: async/await
+
+#### 📋 지원 정책
+1. **최신 기술 우선**: 최신 브라우저에서 최적의 경험 제공
+2. **점진적 개선**: 새로운 API 기능을 적극 활용
+3. **넓은 호환성**: 2020년 이후 브라우저 대부분 지원
+4. **성능 최적화**: 최신 브라우저의 성능 최적화 기능 활용
 
 ## 📦 설치 및 실행
 
@@ -74,6 +105,11 @@ http://localhost:4321
 - **이미지 초기화**: 업로드된 이미지만 초기화, 설정은 유지
 - **새로 시작**: 모든 설정을 포함한 완전 초기화
 
+### 7. 설정 관리
+- **자동 저장**: 설정 변경 시 자동으로 브라우저에 저장
+- **자동 복원**: 페이지 로드 시 이전 설정 자동 복원
+- **수동 관리**: 설정 저장/불러오기/삭제 버튼 제공
+
 ## 📁 프로젝트 구조
 
 ```
@@ -96,7 +132,8 @@ ImageGenerator/
 │   └── astro.config.mjs
 ├── docs/
 │   ├── TODO.md                      # 작업 목록
-│   └── project-setup.md             # 프로젝트 설정 가이드
+│   ├── project-setup.md             # 프로젝트 설정 가이드
+│   └── development-guidelines.md    # 개발 가이드라인
 └── README.md
 ```
 
@@ -110,6 +147,35 @@ ImageGenerator/
 - **Astro**: 정적 사이트 생성기
 - **SCSS**: CSS 전처리기
 - **Vite**: 빌드 도구
+
+## 📋 개발 가이드라인
+
+### 브라우저 지원 기준
+개발 시 다음 기준을 준수하여 최신 기술을 적극 활용하되, 넓은 호환성을 유지합니다.
+
+#### ✅ 권장 사용 기술
+- **JavaScript**: ES6+ (Arrow functions, Destructuring, Template literals, Modules)
+- **CSS**: Grid, Flexbox, Custom Properties, Modern selectors
+- **Web APIs**: CookieStore, Fetch API, Promise, async/await
+- **HTML5**: Semantic elements, Modern form controls
+
+#### ⚠️ 사용 시 주의사항
+- **최신 API 사용 시**: 브라우저 지원 현황 확인 필수
+- **CSS 기능 사용 시**: Can I Use 사이트로 호환성 체크
+- **JavaScript 기능 사용 시**: MDN 문서의 브라우저 지원 표 확인
+
+#### 🔍 브라우저 지원 확인 방법
+1. **Can I Use**: https://caniuse.com/
+2. **MDN Web Docs**: https://developer.mozilla.org/
+3. **Browser Compatibility**: https://web.dev/browser-compatibility/
+
+#### 📝 개발 체크리스트
+- [ ] 사용하는 API가 baseline 브라우저에서 지원되는지 확인
+- [ ] CSS 기능이 모든 대상 브라우저에서 작동하는지 확인
+- [ ] JavaScript 기능이 ES6+ 모듈 시스템과 호환되는지 확인
+- [ ] 성능 최적화가 최신 브라우저에서 효과적인지 확인
+
+> 📖 **더 자세한 개발 가이드라인**: [development-guidelines.md](docs/development-guidelines.md)
 
 ## 📝 주요 모듈
 
@@ -147,6 +213,12 @@ ImageGenerator/
 - **동적 버튼 텍스트**: 상황에 따라 버튼 텍스트 자동 변경
 - **자동 활성화/비활성화**: 사용할 수 없는 버튼은 자동으로 비활성화
 - **툴팁 지원**: 각 버튼에 마우스 호버 시 기능 설명 표시
+
+### 설정 자동 저장
+- **CookieStore API**: 최신 브라우저 API로 안전하고 빠른 쿠키 관리 (Chrome 87+, Firefox 103+, Safari 16+)
+- **자동 저장**: 설정 변경 시 즉시 브라우저에 저장
+- **자동 복원**: 페이지 새로고침 시 이전 설정 자동 복원
+- **30일간 유지**: 설정이 30일간 브라우저에 보관
 
 ### 돋보기 기능
 - 마우스 호버 시 확대 아이콘 표시

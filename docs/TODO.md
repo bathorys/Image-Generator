@@ -10,6 +10,9 @@
 
 ## UI/UX 개선
 - [ ] **Sticky 버튼 수정**: action-buttons와 work-actions의 position: sticky가 제대로 작동하지 않음 - 스크롤 시 따라다니지 않는 문제 해결 필요
+- [ ] **작업물 관리 통합**: 이미지 업로드 화면에서도 작업물 삭제 기능 추가, work-actions 영역을 upload-work-actions와 통합하여 불필요한 중복 제거
+- [ ] **Snackbar 시스템 구축**: alert로 표시되는 메시지들을 모던한 snackbar 레이어로 교체하여 더 나은 사용자 경험 제공
+- [ ] **모달 ESC 키 지원**: 저장된 작업물 팝업에서 ESC 키 클릭 시 팝업 닫기 기능 추가
 - [ ] 로딩 애니메이션 개선
 - [ ] 에러 메시지 표시 개선
 - [ ] 성공 메시지 표시 개선

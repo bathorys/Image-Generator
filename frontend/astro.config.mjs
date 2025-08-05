@@ -4,6 +4,8 @@ import path from 'path';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://bathorys.github.io',
+  base: '/Image-Generator',
   vite: {
     css: {
       preprocessorOptions: {

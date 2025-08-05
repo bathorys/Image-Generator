@@ -52,6 +52,7 @@ export class UIManager {
       processBtn: document.getElementById('processBtn'),
       cropBtn: document.getElementById('cropBtn'),
       downloadBtn: document.getElementById('downloadBtn'),
+      resetImageBtn: document.getElementById('resetImageBtn'),
       resetBtn: document.getElementById('resetBtn'),
       cropSection: document.getElementById('cropSection'),
       cropImage: document.getElementById('cropImage'),
@@ -92,7 +93,20 @@ export class UIManager {
     this.elements.cropSection.style.display = show ? 'block' : 'none';
   }
 
-  // 앱 리셋
+  // 이미지만 초기화 (설정은 유지)
+  resetImage() {
+    this.elements.originalImage.src = '';
+    this.elements.processedImage.src = '';
+    this.elements.cropSection.style.display = 'none';
+
+    // 이미지 정보 초기화
+    this.resetImageInfo();
+
+    // 사이즈 옵션 숨기기
+    this.hideSizeOptions();
+  }
+
+  // 앱 리셋 (모든 설정 포함)
   resetApp() {
     this.elements.previewSection.style.display = 'none';
     this.elements.cropSection.style.display = 'none';

@@ -19,6 +19,9 @@ export class ImageGeneratorApp {
     this.bindEvents();
     this.initMagnifier();
     this.initFormatControls();
+
+    // 초기 버튼 상태 설정
+    this.updateButtonStates();
   }
 
   // 이벤트 바인딩
@@ -39,6 +42,7 @@ export class ImageGeneratorApp {
     elements.processBtn.addEventListener('click', () => this.processImage());
     elements.cropBtn.addEventListener('click', () => this.toggleCropMode());
     elements.downloadBtn.addEventListener('click', () => this.downloadImage());
+    elements.resetImageBtn.addEventListener('click', () => this.resetImage());
     elements.resetBtn.addEventListener('click', () => this.resetApp());
 
     // 크롭 관련 이벤트
@@ -488,6 +492,9 @@ export class ImageGeneratorApp {
 
       // 원본 이미지 정보 업데이트
       this.uiManager.updateOriginalImageInfo(file);
+
+      // 크롭 버튼 텍스트 업데이트
+      this.updateCropButtonText();
     } catch (error) {
       console.error('파일 로드 중 오류:', error);
       this.uiManager.showAlert(error.message);
@@ -526,6 +533,9 @@ export class ImageGeneratorApp {
 
       // 사이즈 옵션 표시
       this.uiManager.showSizeOptions();
+
+      // 크롭 버튼 텍스트 업데이트
+      this.updateCropButtonText();
     } catch (error) {
       console.error('이미지 처리 중 오류:', error);
       this.uiManager.showAlert('이미지 처리 중 오류가 발생했습니다.');
@@ -534,8 +544,9 @@ export class ImageGeneratorApp {
 
   // 크롭 모드 토글
   toggleCropMode() {
-    if (!this.processedBlob) {
-      this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
+    const originalFile = this.fileUploader.getOriginalFile();
+    if (!originalFile) {
+      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
       return;
     }
 
@@ -545,9 +556,42 @@ export class ImageGeneratorApp {
     this.uiManager.toggleCropSection(isCropMode);
 
     if (isCropMode) {
-      this.uiManager.setImageSource(elements.cropImage, elements.processedImage.src);
+      // 처리된 이미지가 있으면 처리된 이미지를, 없으면 원본 이미지를 사용
+      const imageSource = this.processedBlob ? elements.processedImage.src : elements.originalImage.src;
+      this.uiManager.setImageSource(elements.cropImage, imageSource);
       this.cropManager.initCrop(elements.cropImage, elements.cropOverlay);
+    } else {
+      // 크롭 모드 종료 시 버튼 텍스트 업데이트
+      this.updateCropButtonText();
     }
+  }
+
+    // 버튼 상태 업데이트
+  updateButtonStates() {
+    const elements = this.uiManager.getElements();
+    const originalFile = this.fileUploader.getOriginalFile();
+
+    // 크롭 버튼 텍스트 및 상태 업데이트
+    if (!originalFile) {
+      elements.cropBtn.textContent = '크롭 모드';
+      elements.cropBtn.disabled = true;
+    } else if (this.processedBlob) {
+      elements.cropBtn.textContent = '처리된 이미지 크롭';
+      elements.cropBtn.disabled = false;
+    } else {
+      elements.cropBtn.textContent = '원본 이미지 크롭';
+      elements.cropBtn.disabled = false;
+    }
+
+    // 다른 버튼들 상태 업데이트
+    elements.processBtn.disabled = !originalFile;
+    elements.downloadBtn.disabled = !this.processedBlob;
+    elements.resetImageBtn.disabled = !originalFile;
+  }
+
+  // 크롭 버튼 텍스트 업데이트 (기존 함수 유지)
+  updateCropButtonText() {
+    this.updateButtonStates();
   }
 
   // 크롭 마우스 이동 처리
@@ -558,8 +602,9 @@ export class ImageGeneratorApp {
 
   // 크롭 적용
   async applyCrop() {
-    if (!this.processedBlob) {
-      this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
+    const originalFile = this.fileUploader.getOriginalFile();
+    if (!originalFile) {
+      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
       return;
     }
 
@@ -567,7 +612,6 @@ export class ImageGeneratorApp {
       const elements = this.uiManager.getElements();
       const cropData = this.cropManager.getCropData();
       const format = elements.formatSelect.value;
-      const originalFile = this.fileUploader.getOriginalFile();
 
       // 이미지 크기 정보 추가
       cropData.imageWidth = elements.cropImage.offsetWidth;
@@ -582,18 +626,31 @@ export class ImageGeneratorApp {
         webpTransparency: elements.webpTransparency.checked
       };
 
-      this.processedBlob = await this.imageProcessor.cropImage(this.processedBlob, cropData, options);
+      // 크롭할 이미지 소스 결정 (처리된 이미지가 있으면 그것을, 없으면 원본 파일을 사용)
+      let sourceBlob = this.processedBlob;
+      let sourceFile = originalFile;
+
+      if (!sourceBlob) {
+        // 원본 파일을 Blob으로 변환
+        sourceBlob = originalFile;
+        sourceFile = originalFile;
+      }
+
+      this.processedBlob = await this.imageProcessor.cropImage(sourceBlob, cropData, options);
       const url = URL.createObjectURL(this.processedBlob);
       this.uiManager.setImageSource(elements.processedImage, url);
 
       // 크롭된 이미지 정보 업데이트
-      this.uiManager.updateProcessedImageInfo(this.processedBlob, originalFile);
+      this.uiManager.updateProcessedImageInfo(this.processedBlob, sourceFile);
 
       // 크롭 모드 종료
       this.cancelCrop();
 
+      // 크롭 버튼 텍스트 업데이트
+      this.updateCropButtonText();
+
       // 성공 메시지
-      const originalSize = this.imageProcessor.formatFileSize(originalFile.size);
+      const originalSize = this.imageProcessor.formatFileSize(sourceFile.size);
       const newSize = this.imageProcessor.formatFileSize(this.processedBlob.size);
       this.uiManager.showSuccessMessage(originalSize, newSize);
     } catch (error) {
@@ -617,6 +674,9 @@ export class ImageGeneratorApp {
       document.removeEventListener('touchmove', this.globalCropTouchMove);
       document.removeEventListener('touchend', this.globalCropTouchEnd);
     }
+
+    // 크롭 버튼 텍스트 업데이트
+    this.updateCropButtonText();
   }
 
   // 이미지 다운로드
@@ -633,12 +693,26 @@ export class ImageGeneratorApp {
     this.uiManager.createDownloadLink(this.processedBlob, filename);
   }
 
-  // 앱 리셋
+    // 이미지만 초기화 (설정은 유지)
+  resetImage() {
+    this.fileUploader.reset();
+    this.processedBlob = null;
+    this.cropManager.cancelCrop(this.uiManager.getElement('cropOverlay'));
+    this.uiManager.resetImage();
+
+    // 크롭 버튼 텍스트 업데이트
+    this.updateCropButtonText();
+  }
+
+  // 앱 리셋 (모든 설정 포함)
   resetApp() {
     this.fileUploader.reset();
     this.processedBlob = null;
     this.cropManager.cancelCrop(this.uiManager.getElement('cropOverlay'));
     this.uiManager.resetApp();
+
+    // 크롭 버튼 텍스트 업데이트
+    this.updateCropButtonText();
   }
 }
 

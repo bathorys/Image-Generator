@@ -54,9 +54,12 @@ export class UIManager {
       downloadBtn: document.getElementById('downloadBtn'),
       resetImageBtn: document.getElementById('resetImageBtn'),
       resetBtn: document.getElementById('resetBtn'),
-      saveSettingsBtn: document.getElementById('saveSettingsBtn'),
-      loadSettingsBtn: document.getElementById('loadSettingsBtn'),
-      clearSettingsBtn: document.getElementById('clearSettingsBtn'),
+      saveWorkBtn: document.getElementById('saveWorkBtn'),
+      loadWorkBtn: document.getElementById('loadWorkBtn'),
+      autoSaveBtn: document.getElementById('autoSaveBtn'),
+      clearWorksBtn: document.getElementById('clearWorksBtn'),
+      uploadLoadWorkBtn: document.getElementById('uploadLoadWorkBtn'),
+      uploadAutoSaveBtn: document.getElementById('uploadAutoSaveBtn'),
       cropSection: document.getElementById('cropSection'),
       cropImage: document.getElementById('cropImage'),
       cropOverlay: document.getElementById('cropOverlay'),
@@ -76,7 +79,21 @@ export class UIManager {
       resetZoomBtn: document.getElementById('resetZoomBtn'),
       zoomLevel: document.getElementById('zoomLevel'),
       originalImageContainer: document.getElementById('originalImage').parentElement,
-      processedImageContainer: document.getElementById('processedImage').parentElement
+      processedImageContainer: document.getElementById('processedImage').parentElement,
+
+      // 작업물 모달 관련 요소들
+      workModal: document.getElementById('workModal'),
+      workList: document.getElementById('workList'),
+      workEmpty: document.getElementById('workEmpty'),
+      closeWorkModal: document.getElementById('closeWorkModal'),
+      workSaveModal: document.getElementById('workSaveModal'),
+      workNameInput: document.getElementById('workNameInput'),
+      saveOriginalPreview: document.getElementById('saveOriginalPreview'),
+      saveProcessedPreview: document.getElementById('saveProcessedPreview'),
+      saveSettingsPreview: document.getElementById('saveSettingsPreview'),
+      confirmSaveWorkBtn: document.getElementById('confirmSaveWorkBtn'),
+      cancelSaveWorkBtn: document.getElementById('cancelSaveWorkBtn'),
+      closeWorkSaveModal: document.getElementById('closeWorkSaveModal')
     };
   }
 

@@ -3,7 +3,7 @@ import { ImageProcessor } from '/Image-Generator/js/modules/imageProcessor.js';
 import { CropManager } from '/Image-Generator/js/modules/cropManager.js';
 import { FileUploader } from '/Image-Generator/js/modules/fileUploader.js';
 import { UIManager } from '/Image-Generator/js/modules/uiManager.js';
-import { CookieManager } from '/Image-Generator/js/modules/cookieManager.js';
+import { WorkManager } from '/Image-Generator/js/modules/workManager.js';
 
 export class ImageGeneratorApp {
   constructor() {
@@ -11,7 +11,8 @@ export class ImageGeneratorApp {
     this.cropManager = new CropManager();
     this.fileUploader = new FileUploader();
     this.uiManager = new UIManager();
-    this.cookieManager = new CookieManager();
+    this.workManager = new WorkManager();
+    this.autoSaveEnabled = false;
     this.processedBlob = null;
   }
 
@@ -22,11 +23,17 @@ export class ImageGeneratorApp {
     this.initMagnifier();
     this.initFormatControls();
 
-    // 저장된 설정 불러오기
-    await this.loadSavedSettings();
+    // 자동 저장된 작업물이 있는지 확인
+    await this.checkAutoSave();
 
     // 초기 버튼 상태 설정
     this.updateButtonStates();
+
+    // 업로드 섹션 자동저장 버튼 초기 상태 설정
+    const elements = this.uiManager.getElements();
+    elements.uploadAutoSaveBtn.textContent = this.autoSaveEnabled ? '🔄 자동저장 ON' : '🔄 자동저장';
+    elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
+    elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
   }
 
   // 이벤트 바인딩
@@ -50,10 +57,21 @@ export class ImageGeneratorApp {
     elements.resetImageBtn.addEventListener('click', () => this.resetImage());
     elements.resetBtn.addEventListener('click', () => this.resetApp());
 
-    // 설정 관련 버튼 이벤트
-    elements.saveSettingsBtn.addEventListener('click', () => this.saveSettingsManually());
-    elements.loadSettingsBtn.addEventListener('click', () => this.loadSavedSettings());
-    elements.clearSettingsBtn.addEventListener('click', () => this.clearSettings());
+    // 작업물 관련 버튼 이벤트
+    elements.saveWorkBtn.addEventListener('click', () => this.showSaveWorkModal());
+    elements.loadWorkBtn.addEventListener('click', () => this.showWorkListModal());
+    elements.autoSaveBtn.addEventListener('click', () => this.toggleAutoSave());
+    elements.clearWorksBtn.addEventListener('click', () => this.clearAllWorks());
+
+    // 업로드 섹션 작업물 관련 버튼 이벤트
+    elements.uploadLoadWorkBtn.addEventListener('click', () => this.showWorkListModal());
+    elements.uploadAutoSaveBtn.addEventListener('click', () => this.toggleAutoSave());
+
+    // 모달 관련 이벤트
+    elements.closeWorkModal.addEventListener('click', () => this.hideWorkModal());
+    elements.closeWorkSaveModal.addEventListener('click', () => this.hideSaveWorkModal());
+    elements.confirmSaveWorkBtn.addEventListener('click', () => this.saveWork());
+    elements.cancelSaveWorkBtn.addEventListener('click', () => this.hideSaveWorkModal());
 
     // 크롭 관련 이벤트
     elements.applyCropBtn.addEventListener('click', () => this.applyCrop());
@@ -70,73 +88,53 @@ export class ImageGeneratorApp {
     // 형식 선택 이벤트
     elements.formatSelect.addEventListener('change', () => {
       this.updateFormatControls();
-      this.saveCurrentSettings().catch(error => {
-        console.error('설정 자동 저장 실패:', error);
-      }); // 자동 저장 (알림 없음)
+      this.autoSaveWork();
     });
 
     // 슬라이더 이벤트
     elements.jpegQualitySlider.addEventListener('input', () => {
       elements.jpegQualityValue.textContent = elements.jpegQualitySlider.value + '%';
-      this.saveCurrentSettings().catch(error => {
-        console.error('설정 자동 저장 실패:', error);
-      });
+      this.autoSaveWork();
     });
 
     elements.pngCompressionSlider.addEventListener('input', () => {
       elements.pngCompressionValue.textContent = elements.pngCompressionSlider.value;
-      this.saveCurrentSettings().catch(error => {
-        console.error('설정 자동 저장 실패:', error);
-      });
+      this.autoSaveWork();
     });
 
     elements.webpQualitySlider.addEventListener('input', () => {
       elements.webpQualityValue.textContent = elements.webpQualitySlider.value + '%';
-      this.saveCurrentSettings().catch(error => {
-        console.error('설정 자동 저장 실패:', error);
-      });
+      this.autoSaveWork();
     });
 
     // WebP 투명도 이벤트
     elements.webpTransparency.addEventListener('change', () => {
-      this.saveCurrentSettings().catch(error => {
-        console.error('설정 자동 저장 실패:', error);
-      });
+      this.autoSaveWork();
     });
 
     // 최대 크기 입력 이벤트
     elements.maxWidth.addEventListener('input', () => {
-      this.saveCurrentSettings().catch(error => {
-        console.error('설정 자동 저장 실패:', error);
-      });
+      this.autoSaveWork();
     });
 
     elements.maxHeight.addEventListener('input', () => {
-      this.saveCurrentSettings().catch(error => {
-        console.error('설정 자동 저장 실패:', error);
-      });
+      this.autoSaveWork();
     });
 
     // 사이즈 옵션 이벤트
     if (elements.size1x) {
       elements.size1x.addEventListener('change', () => {
-        this.saveCurrentSettings().catch(error => {
-          console.error('설정 자동 저장 실패:', error);
-        });
+        this.autoSaveWork();
       });
     }
     if (elements.size2x) {
       elements.size2x.addEventListener('change', () => {
-        this.saveCurrentSettings().catch(error => {
-          console.error('설정 자동 저장 실패:', error);
-        });
+        this.autoSaveWork();
       });
     }
     if (elements.size3x) {
       elements.size3x.addEventListener('change', () => {
-        this.saveCurrentSettings().catch(error => {
-          console.error('설정 자동 저장 실패:', error);
-        });
+        this.autoSaveWork();
       });
     }
 
@@ -780,10 +778,10 @@ export class ImageGeneratorApp {
     this.updateButtonStates();
   }
 
-      // 현재 설정 저장
-  async saveCurrentSettings() {
+  // 현재 설정 가져오기
+  getCurrentSettings() {
     const elements = this.uiManager.getElements();
-    const settings = {
+    return {
       format: elements.formatSelect.value,
       jpegQuality: parseInt(elements.jpegQualitySlider.value),
       pngCompression: parseInt(elements.pngCompressionSlider.value),
@@ -797,96 +795,391 @@ export class ImageGeneratorApp {
         size3x: elements.size3x ? elements.size3x.checked : false
       }
     };
-
-    await this.cookieManager.saveSettings(settings);
   }
 
-  // 수동 설정 저장 (사용자 버튼 클릭 시)
-  async saveSettingsManually() {
-    await this.saveCurrentSettings();
-    this.uiManager.showAlert('설정이 저장되었습니다.');
+  // 자동 저장
+  async autoSaveWork() {
+    if (!this.autoSaveEnabled) return;
+
+    const originalFile = this.fileUploader.getOriginalFile();
+    if (!originalFile) return;
+
+    const elements = this.uiManager.getElements();
+    const originalImage = elements.originalImage.src;
+    const processedImage = this.processedBlob ? elements.processedImage.src : null;
+    const settings = this.getCurrentSettings();
+
+    await this.workManager.autoSave(originalImage, processedImage, settings);
   }
 
-  // 저장된 설정 불러오기
-  async loadSavedSettings() {
-    const savedSettings = await this.cookieManager.loadSettings();
-    if (!savedSettings) {
-      this.uiManager.showAlert('저장된 설정이 없습니다.');
-      return; // 저장된 설정이 없으면 기본값 사용
+  // 자동 저장 확인
+  async checkAutoSave() {
+    const autoSave = await this.workManager.loadAutoSave();
+    if (autoSave) {
+      const shouldLoad = confirm('자동 저장된 작업물이 있습니다. 불러오시겠습니까?');
+      if (shouldLoad) {
+        await this.loadWork(autoSave);
+      }
+    }
+  }
+
+  // 작업물 저장 모달 표시
+  showSaveWorkModal() {
+    const originalFile = this.fileUploader.getOriginalFile();
+    if (!originalFile) {
+      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
+      return;
     }
 
     const elements = this.uiManager.getElements();
+    const workModal = elements.workSaveModal;
+
+    // 저장할 내용 미리보기 업데이트
+    elements.saveOriginalPreview.textContent = originalFile.name;
+    elements.saveProcessedPreview.textContent = this.processedBlob ? '있음' : '없음';
+    elements.saveSettingsPreview.textContent = this.getCurrentSettings().format;
+
+    workModal.style.display = 'block';
+    elements.workNameInput.focus();
+  }
+
+  // 작업물 저장 모달 숨기기
+  hideSaveWorkModal() {
+    const elements = this.uiManager.getElements();
+    elements.workSaveModal.style.display = 'none';
+    elements.workNameInput.value = '';
+  }
+
+  // 작업물 저장
+  async saveWork() {
+    const elements = this.uiManager.getElements();
+    const workName = elements.workNameInput.value.trim();
+
+    if (!workName) {
+      this.uiManager.showAlert('작업물 이름을 입력해주세요.');
+      return;
+    }
+
+    const originalFile = this.fileUploader.getOriginalFile();
+    const originalImage = elements.originalImage.src;
+    const processedImage = this.processedBlob ? elements.processedImage.src : null;
+    const settings = this.getCurrentSettings();
+
+    const workData = await this.workManager.createWorkData(originalImage, processedImage, settings, workName);
+    const success = await this.workManager.saveWork(workData);
+
+    if (success) {
+      this.uiManager.showAlert('작업물이 저장되었습니다.');
+      this.hideSaveWorkModal();
+    } else {
+      this.uiManager.showAlert('작업물 저장에 실패했습니다.');
+    }
+  }
+
+  // 작업물 목록 모달 표시
+  async showWorkListModal() {
+    const elements = this.uiManager.getElements();
+    const workModal = elements.workModal;
+    const workList = elements.workList;
+    const workEmpty = elements.workEmpty;
+
+    const works = await this.workManager.getWorkList();
+
+    if (works.length === 0) {
+      workList.style.display = 'none';
+      workEmpty.style.display = 'block';
+    } else {
+      workList.style.display = 'grid';
+      workEmpty.style.display = 'none';
+
+      // 기존 목록 초기화
+      workList.innerHTML = '';
+
+      // 작업물 목록 생성
+      works.forEach(work => {
+        const workItem = this.createWorkItem(work);
+        workList.appendChild(workItem);
+      });
+    }
+
+    workModal.style.display = 'block';
+  }
+
+  // 작업물 목록 모달 숨기기
+  hideWorkModal() {
+    const elements = this.uiManager.getElements();
+    elements.workModal.style.display = 'none';
+  }
+
+  // 작업물 아이템 생성
+  createWorkItem(work) {
+    const workItem = document.createElement('div');
+    workItem.className = 'work-item';
+    workItem.dataset.workId = work.id;
+
+    const date = new Date(work.createdAt).toLocaleString('ko-KR');
+
+    workItem.innerHTML = `
+      <img src="${work.thumbnail}" alt="${work.name}" class="work-thumbnail" />
+      <div class="work-name">${work.name}</div>
+      <div class="work-date">${date}</div>
+      <div class="work-info">
+        <div class="info-item">
+          <span>형식:</span>
+          <span>${work.settings.format}</span>
+        </div>
+        <div class="info-item">
+          <span>처리됨:</span>
+          <span>${work.processedImage ? '예' : '아니오'}</span>
+        </div>
+      </div>
+      <div class="work-actions">
+        <button class="btn btn-primary load-work-btn">불러오기</button>
+        <button class="btn btn-danger delete-work-btn">삭제</button>
+      </div>
+    `;
+
+    // 이벤트 리스너 추가
+    workItem.querySelector('.load-work-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.loadWork(work);
+      this.hideWorkModal();
+    });
+
+    workItem.querySelector('.delete-work-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.deleteWork(work.id);
+    });
+
+    return workItem;
+  }
+
+    // 작업물 불러오기
+  async loadWork(work) {
+    const elements = this.uiManager.getElements();
+
+    try {
+      // 이미지 로드 완료를 기다리는 Promise
+      const loadImage = (src) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(src);
+          img.onerror = () => reject(new Error(`이미지 로드 실패: ${src}`));
+          img.src = src;
+        });
+      };
+
+      // 원본 이미지 로드
+      await loadImage(work.originalImage);
+      elements.originalImage.src = work.originalImage;
+      this.fileUploader.setOriginalFile(work.originalImage);
+
+      // 원본 이미지 정보 업데이트
+      this.updateOriginalImageInfo(work.originalImage);
+
+      // 처리된 이미지 설정
+      if (work.processedImage) {
+        await loadImage(work.processedImage);
+        elements.processedImage.src = work.processedImage;
+        this.processedBlob = work.processedImage;
+
+        // 처리된 이미지 정보 업데이트
+        this.updateProcessedImageInfo(work.processedImage, work.originalImage);
+      } else {
+        elements.processedImage.src = work.originalImage;
+        this.processedBlob = null;
+
+        // 처리된 이미지 정보 초기화
+        this.uiManager.resetProcessedImageInfo();
+      }
+
+      // 설정 적용
+      this.applySettings(work.settings);
+
+      // 미리보기 섹션 표시
+      this.uiManager.showPreview();
+
+      // 버튼 상태 업데이트
+      this.updateButtonStates();
+
+      this.uiManager.showAlert('작업물을 불러왔습니다.');
+    } catch (error) {
+      console.error('작업물 불러오기 실패:', error);
+      this.uiManager.showAlert('작업물을 불러오는 중 오류가 발생했습니다. 이미지 데이터가 손상되었을 수 있습니다.');
+    }
+  }
+
+    // 원본 이미지 정보 업데이트 (Base64 이미지용)
+  updateOriginalImageInfo(base64Image) {
+    const elements = this.uiManager.getElements();
+
+    try {
+      // Base64에서 파일 크기 계산
+      const base64Data = base64Image.split(',')[1];
+      const fileSize = Math.ceil((base64Data.length * 3) / 4);
+
+      // 이미지 크기 계산
+      const img = new Image();
+      img.onload = () => {
+        elements.originalImageSize.textContent = `${img.width} × ${img.height}`;
+        elements.originalFileSize.textContent = this.uiManager.formatFileSize(fileSize);
+
+        // 형식 추출
+        const format = base64Image.split(';')[0].split('/')[1];
+        elements.originalFormat.textContent = format.toUpperCase();
+      };
+      img.src = base64Image;
+    } catch (error) {
+      console.error('이미지 정보 업데이트 실패:', error);
+      elements.originalImageSize.textContent = '-';
+      elements.originalFileSize.textContent = '-';
+      elements.originalFormat.textContent = '-';
+    }
+  }
+
+  // 처리된 이미지 정보 업데이트 (Base64 이미지용)
+  updateProcessedImageInfo(processedBase64, originalBase64) {
+    const elements = this.uiManager.getElements();
+
+    try {
+      // Base64에서 파일 크기 계산
+      const processedData = processedBase64.split(',')[1];
+      const originalData = originalBase64.split(',')[1];
+      const processedSize = Math.ceil((processedData.length * 3) / 4);
+      const originalSize = Math.ceil((originalData.length * 3) / 4);
+
+      // 이미지 크기 계산
+      const img = new Image();
+      img.onload = () => {
+        elements.processedImageSize.textContent = `${img.width} × ${img.height}`;
+        elements.processedFileSize.textContent = this.uiManager.formatFileSize(processedSize);
+
+        // 형식 추출
+        const format = processedBase64.split(';')[0].split('/')[1];
+        elements.processedFormat.textContent = format.toUpperCase();
+
+        // 압축 정보 표시
+        const compressionRatio = ((originalSize - processedSize) / originalSize * 100).toFixed(1);
+        elements.compressionRatio.textContent = `${compressionRatio}%`;
+        elements.compressionInfo.style.display = 'block';
+      };
+      img.src = processedBase64;
+    } catch (error) {
+      console.error('처리된 이미지 정보 업데이트 실패:', error);
+      elements.processedImageSize.textContent = '-';
+      elements.processedFileSize.textContent = '-';
+      elements.processedFormat.textContent = '-';
+      elements.compressionInfo.style.display = 'none';
+    }
+  }
+
+  // 설정 적용
+  applySettings(settings) {
+    const elements = this.uiManager.getElements();
 
     // 형식 설정
-    if (savedSettings.format) {
-      elements.formatSelect.value = savedSettings.format;
+    if (settings.format) {
+      elements.formatSelect.value = settings.format;
       this.updateFormatControls();
     }
 
     // JPEG 품질 설정
-    if (savedSettings.jpegQuality) {
-      elements.jpegQualitySlider.value = savedSettings.jpegQuality;
-      elements.jpegQualityValue.textContent = savedSettings.jpegQuality + '%';
+    if (settings.jpegQuality) {
+      elements.jpegQualitySlider.value = settings.jpegQuality;
+      elements.jpegQualityValue.textContent = settings.jpegQuality + '%';
     }
 
     // PNG 압축 설정
-    if (savedSettings.pngCompression !== undefined) {
-      elements.pngCompressionSlider.value = savedSettings.pngCompression;
-      elements.pngCompressionValue.textContent = savedSettings.pngCompression;
+    if (settings.pngCompression !== undefined) {
+      elements.pngCompressionSlider.value = settings.pngCompression;
+      elements.pngCompressionValue.textContent = settings.pngCompression;
     }
 
     // WebP 품질 설정
-    if (savedSettings.webpQuality) {
-      elements.webpQualitySlider.value = savedSettings.webpQuality;
-      elements.webpQualityValue.textContent = savedSettings.webpQuality + '%';
+    if (settings.webpQuality) {
+      elements.webpQualitySlider.value = settings.webpQuality;
+      elements.webpQualityValue.textContent = settings.webpQuality + '%';
     }
 
     // WebP 투명도 설정
-    if (savedSettings.webpTransparency !== undefined) {
-      elements.webpTransparency.checked = savedSettings.webpTransparency;
+    if (settings.webpTransparency !== undefined) {
+      elements.webpTransparency.checked = settings.webpTransparency;
     }
 
     // 최대 크기 설정
-    if (savedSettings.maxWidth !== undefined) {
-      elements.maxWidth.value = savedSettings.maxWidth;
+    if (settings.maxWidth !== undefined) {
+      elements.maxWidth.value = settings.maxWidth;
     }
-    if (savedSettings.maxHeight !== undefined) {
-      elements.maxHeight.value = savedSettings.maxHeight;
+    if (settings.maxHeight !== undefined) {
+      elements.maxHeight.value = settings.maxHeight;
     }
 
     // 사이즈 옵션 설정
-    if (savedSettings.sizeOptions) {
-      if (elements.size1x && savedSettings.sizeOptions.size1x !== undefined) {
-        elements.size1x.checked = savedSettings.sizeOptions.size1x;
+    if (settings.sizeOptions) {
+      if (elements.size1x && settings.sizeOptions.size1x !== undefined) {
+        elements.size1x.checked = settings.sizeOptions.size1x;
       }
-      if (elements.size2x && savedSettings.sizeOptions.size2x !== undefined) {
-        elements.size2x.checked = savedSettings.sizeOptions.size2x;
+      if (elements.size2x && settings.sizeOptions.size2x !== undefined) {
+        elements.size2x.checked = settings.sizeOptions.size2x;
       }
-      if (elements.size3x && savedSettings.sizeOptions.size3x !== undefined) {
-        elements.size3x.checked = savedSettings.sizeOptions.size3x;
+      if (elements.size3x && settings.sizeOptions.size3x !== undefined) {
+        elements.size3x.checked = settings.sizeOptions.size3x;
       }
-    }
-
-    this.uiManager.showAlert('설정을 불러왔습니다.');
-  }
-
-  // 설정 삭제
-  async clearSettings() {
-    if (confirm('저장된 설정을 삭제하시겠습니까?')) {
-      await this.cookieManager.clearSettings();
-      this.uiManager.showAlert('설정이 삭제되었습니다.');
     }
   }
 
-    // 앱 리셋 (모든 설정 포함)
+  // 작업물 삭제
+  async deleteWork(workId) {
+    if (confirm('이 작업물을 삭제하시겠습니까?')) {
+      const success = await this.workManager.deleteWork(workId);
+      if (success) {
+        this.uiManager.showAlert('작업물이 삭제되었습니다.');
+        // 목록 새로고침
+        await this.showWorkListModal();
+      } else {
+        this.uiManager.showAlert('작업물 삭제에 실패했습니다.');
+      }
+    }
+  }
+
+    // 자동 저장 토글
+  toggleAutoSave() {
+    this.autoSaveEnabled = !this.autoSaveEnabled;
+    const elements = this.uiManager.getElements();
+
+    // 메인 자동저장 버튼 업데이트
+    elements.autoSaveBtn.textContent = this.autoSaveEnabled ? '자동저장 ON' : '자동저장';
+    elements.autoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
+    elements.autoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
+
+    // 업로드 섹션 자동저장 버튼 업데이트
+    elements.uploadAutoSaveBtn.textContent = this.autoSaveEnabled ? '🔄 자동저장 ON' : '🔄 자동저장';
+    elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
+    elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
+
+    this.uiManager.showAlert(
+      this.autoSaveEnabled ? '자동 저장이 활성화되었습니다.' : '자동 저장이 비활성화되었습니다.'
+    );
+  }
+
+  // 모든 작업물 삭제
+  async clearAllWorks() {
+    if (confirm('모든 저장된 작업물을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      const success = await this.workManager.clearAllWorks();
+      if (success) {
+        this.uiManager.showAlert('모든 작업물이 삭제되었습니다.');
+      } else {
+        this.uiManager.showAlert('작업물 삭제에 실패했습니다.');
+      }
+    }
+  }
+
+  // 앱 리셋 (모든 설정 포함)
   async resetApp() {
     this.fileUploader.reset();
     this.processedBlob = null;
     this.cropManager.cancelCrop(this.uiManager.getElement('cropOverlay'));
     this.uiManager.resetApp();
-
-    // 저장된 설정도 삭제
-    await this.cookieManager.clearSettings();
 
     // 크롭 버튼 텍스트 업데이트
     this.updateCropButtonText();

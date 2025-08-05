@@ -17,30 +17,64 @@ export class WorkManager {
     this.autoSaveKey = 'imageGeneratorAutoSave';
   }
 
+  // Blob URL을 Base64로 변환
+  async blobUrlToBase64(blobUrl) {
+    try {
+      const response = await fetch(blobUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Blob URL을 Base64로 변환 실패:', error);
+      return null;
+    }
+  }
+
+  // 이미지 소스를 Base64로 변환
+  async convertImageToBase64(imageSrc) {
+    if (imageSrc.startsWith('data:')) {
+      // 이미 Base64인 경우
+      return imageSrc;
+    } else if (imageSrc.startsWith('blob:')) {
+      // Blob URL인 경우 Base64로 변환
+      return await this.blobUrlToBase64(imageSrc);
+    }
+    return imageSrc;
+  }
+
   // 작업물 데이터 구조
-  createWorkData(originalImage, processedImage, settings, workName = null) {
+  async createWorkData(originalImage, processedImage, settings, workName = null) {
+    // 이미지 데이터를 Base64로 변환
+    const originalBase64 = await this.convertImageToBase64(originalImage);
+    const processedBase64 = processedImage ? await this.convertImageToBase64(processedImage) : null;
+
+    const thumbnail = await this.createThumbnail(originalBase64);
     return {
       id: Date.now().toString(),
       name: workName || `작업물_${new Date().toLocaleString('ko-KR')}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      originalImage: originalImage, // Base64 또는 Blob URL
-      processedImage: processedImage, // Base64 또는 Blob URL (없으면 null)
+      originalImage: originalBase64, // 항상 Base64
+      processedImage: processedBase64, // Base64 또는 null
       settings: settings,
-      thumbnail: this.createThumbnail(originalImage) // 썸네일 생성
+      thumbnail: thumbnail // 썸네일 생성
     };
   }
 
   // 썸네일 생성 (원본 이미지의 작은 버전)
-  createThumbnail(imageSrc) {
+  async createThumbnail(imageSrc) {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
 
-      img.onload = () => {
-        // 썸네일 크기 (100x100)
-        const maxSize = 100;
+            img.onload = () => {
+        // 썸네일 크기 (150x150)
+        const maxSize = 150;
         let { width, height } = img;
 
         if (width > height) {
@@ -55,7 +89,7 @@ export class WorkManager {
         canvas.height = height;
 
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        resolve(canvas.toDataURL('image/jpeg', 0.9));
       };
 
       img.src = imageSrc;
@@ -125,7 +159,7 @@ export class WorkManager {
   // 자동 저장
   async autoSave(originalImage, processedImage, settings) {
     try {
-      const workData = this.createWorkData(originalImage, processedImage, settings, '자동저장');
+      const workData = await this.createWorkData(originalImage, processedImage, settings, '자동저장');
       const works = await this.getWorkList();
 
       // 기존 자동저장 찾기

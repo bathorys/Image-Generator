@@ -1,27 +1,162 @@
 // 타이포그래피 스타일
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: $text-primary;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $spacing-md;
+  color: $text-primary;
 }
 
 h1 {
   font-size: $font-size-xxxl;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: $spacing-sm;
 }
 
 h2 {
   font-size: $font-size-xxl;
+  font-weight: 700;
+  margin-bottom: $spacing-md;
 }
 
 h3 {
   font-size: $font-size-xl;
+  font-weight: 600;
+  margin-bottom: $spacing-sm;
+}
+
+h4 {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  margin-bottom: $spacing-xs;
+}
+
+h5 {
+  font-size: $font-size-base;
+  font-weight: 600;
+  margin-bottom: $spacing-xs;
+}
+
+h6 {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  margin-bottom: $spacing-xs;
 }
 
 p {
-  margin-bottom: $spacing-sm;
-  line-height: 1.6;
+  margin-bottom: $spacing-md;
+  line-height: 1.7;
+  color: $text-secondary;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
+a {
+  color: $primary-color;
+  text-decoration: none;
+  transition: all $transition-base;
+  font-weight: 500;
+
+  &:hover {
+    color: darken($primary-color, 10%);
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: 2px solid $primary-color;
+    outline-offset: 2px;
+  }
+}
+
+strong, b {
+  font-weight: 700;
+  color: $text-primary;
+}
+
+em, i {
+  font-style: italic;
+  color: $text-secondary;
+}
+
+small {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  line-height: 1.4;
+}
+
+code {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: $font-size-sm;
+  background: rgba($primary-color, 0.1);
+  color: $primary-color;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-sm;
+  font-weight: 500;
+}
+
+pre {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  background: $dark-color;
+  color: white;
+  padding: $spacing-lg;
+  border-radius: $border-radius-md;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin-bottom: $spacing-lg;
+}
+
+blockquote {
+  border-left: 4px solid $primary-color;
+  padding-left: $spacing-lg;
+  margin: $spacing-lg 0;
+  font-style: italic;
+  color: $text-secondary;
+  background: rgba($primary-color, 0.05);
+  padding: $spacing-lg;
+  border-radius: $border-radius-md;
+}
+
+ul, ol {
+  margin-bottom: $spacing-md;
+  padding-left: $spacing-lg;
+
+  li {
+    margin-bottom: $spacing-xs;
+    line-height: 1.6;
+    color: $text-secondary;
+  }
+}
+
+ul {
+  list-style-type: disc;
+
+  ul {
+    list-style-type: circle;
+    margin-top: $spacing-xs;
+  }
+}
+
+ol {
+  list-style-type: decimal;
+
+  ol {
+    list-style-type: lower-alpha;
+    margin-top: $spacing-xs;
+  }
+}
+
+// 텍스트 유틸리티 클래스
 .text-center {
   text-align: center;
 }
@@ -34,12 +169,16 @@ p {
   text-align: right;
 }
 
-.text-muted {
-  color: $text-muted;
-}
-
 .text-primary {
   color: $primary-color;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+.text-muted {
+  color: $text-muted;
 }
 
 .text-success {
@@ -52,4 +191,76 @@ p {
 
 .text-danger {
   color: $danger-color;
+}
+
+.text-info {
+  color: $info-color;
+}
+
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
+}
+
+.text-xs {
+  font-size: $font-size-xs;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.text-base {
+  font-size: $font-size-base;
+}
+
+.text-lg {
+  font-size: $font-size-lg;
+}
+
+.text-xl {
+  font-size: $font-size-xl;
+}
+
+.text-xxl {
+  font-size: $font-size-xxl;
+}
+
+.text-xxxl {
+  font-size: $font-size-xxxl;
+}
+
+.leading-tight {
+  line-height: 1.25;
+}
+
+.leading-normal {
+  line-height: 1.5;
+}
+
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.leading-loose {
+  line-height: 2;
 }

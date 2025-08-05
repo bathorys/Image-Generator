@@ -14,13 +14,13 @@ $text-muted: #999;
 $border-color: #ddd;
 $border-light: #eee;
 
-// 간격 변수
-$spacing-xs: 0.5rem;
-$spacing-sm: 1rem;
-$spacing-md: 1.5rem;
-$spacing-lg: 2rem;
-$spacing-xl: 3rem;
-$spacing-xxl: 4rem;
+// 간격 변수 - 8px 기반 시스템
+$spacing-xs: 0.25rem;  // 4px
+$spacing-sm: 0.5rem;   // 8px
+$spacing-md: 1rem;     // 16px
+$spacing-lg: 1.5rem;   // 24px
+$spacing-xl: 2rem;     // 32px
+$spacing-xxl: 3rem;    // 48px
 
 // 폰트 크기
 $font-size-xs: 0.75rem;

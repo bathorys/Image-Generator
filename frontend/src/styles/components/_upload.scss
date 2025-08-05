@@ -1,41 +1,154 @@
 .upload-section {
   border: 3px dashed $border-color;
-  border-radius: $border-radius-xl;
-  padding: $spacing-xxl $spacing-lg;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
   text-align: center;
-  margin-bottom: $spacing-xl;
+  margin-bottom: $spacing-lg;
   transition: all $transition-base;
   cursor: pointer;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba($primary-color, 0.1), transparent);
+    transition: left 0.6s ease;
+  }
 
   &:hover {
     border-color: $primary-color;
-    background-color: rgba($primary-color, 0.05);
+    background: linear-gradient(135deg, rgba($primary-color, 0.05) 0%, #ffffff 100%);
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+
+    &::before {
+      left: 100%;
+    }
   }
 
   &.dragover {
     border-color: $primary-color;
-    background-color: rgba($primary-color, 0.1);
+    background: linear-gradient(135deg, rgba($primary-color, 0.1) 0%, rgba($primary-color, 0.05) 100%);
     transform: scale(1.02);
+    box-shadow: $shadow-xl;
+
+    .upload-icon {
+      transform: scale(1.1);
+      color: $primary-color;
+    }
+
+    .upload-text {
+      color: $primary-color;
+    }
+  }
+
+  &.has-file {
+    border-color: $success-color;
+    background: linear-gradient(135deg, rgba($success-color, 0.05) 0%, #ffffff 100%);
+
+    .upload-icon {
+      color: $success-color;
+    }
+
+    .upload-text {
+      color: $success-color;
+    }
   }
 }
 
 .upload-icon {
   font-size: 3rem;
   color: $primary-color;
-  margin-bottom: $spacing-lg;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+  display: block;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
 .upload-text {
-  font-size: $font-size-xl;
+  font-size: $font-size-lg;
   color: $text-secondary;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $spacing-xs;
+  font-weight: 600;
+  transition: color $transition-base;
 }
 
 .upload-hint {
   color: $text-muted;
   font-size: $font-size-sm;
+  opacity: 0.8;
+  transition: opacity $transition-base;
 }
 
 .file-input {
   display: none;
+}
+
+// 업로드 작업물 액션 버튼 개선
+.upload-work-actions {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  margin: $spacing-md 0 $spacing-lg 0;
+  padding: $spacing-sm;
+  background: linear-gradient(135deg, rgba($primary-color, 0.05) 0%, rgba($secondary-color, 0.05) 100%);
+  border-radius: $border-radius-md;
+  border: 1px solid rgba($primary-color, 0.2);
+  box-shadow: $shadow-sm;
+
+  .btn {
+    font-size: $font-size-sm;
+    padding: $spacing-xs $spacing-sm;
+    min-width: 140px;
+    max-width: 180px;
+    border-radius: $border-radius-md;
+    font-weight: 600;
+    transition: all $transition-base;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s ease;
+    }
+
+    &:hover::before {
+      left: 100%;
+    }
+
+    &.btn-info {
+      background: linear-gradient(135deg, $info-color 0%, darken($info-color, 10%) 100%);
+      box-shadow: 0 2px 8px rgba($info-color, 0.3);
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($info-color, 0.4);
+      }
+    }
+
+    &.btn-warning {
+      background: linear-gradient(135deg, $warning-color 0%, darken($warning-color, 10%) 100%);
+      box-shadow: 0 2px 8px rgba($warning-color, 0.3);
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($warning-color, 0.4);
+      }
+    }
+  }
 }

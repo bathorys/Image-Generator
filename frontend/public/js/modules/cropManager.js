@@ -12,7 +12,11 @@ export class CropManager {
       startX: 0,
       startY: 0,
       startWidth: 0,
-      startHeight: 0
+      startHeight: 0,
+      dragStartX: 0,
+      dragStartY: 0,
+      mouseStartX: 0,
+      mouseStartY: 0
     };
     this.isCropMode = false;
   }
@@ -92,8 +96,8 @@ export class CropManager {
     if (e.target.classList.contains('crop-handle')) return;
 
     this.cropData.isDragging = true;
-    this.cropData.startX = e.clientX - this.cropData.x;
-    this.cropData.startY = e.clientY - this.cropData.y;
+    this.cropData.dragStartX = e.clientX - this.cropData.x;
+    this.cropData.dragStartY = e.clientY - this.cropData.y;
     e.preventDefault();
   }
 
@@ -101,10 +105,12 @@ export class CropManager {
   startCropResize(e, handle) {
     this.cropData.isResizing = true;
     this.cropData.resizeHandle = handle;
-    this.cropData.startX = e.clientX;
-    this.cropData.startY = e.clientY;
+    this.cropData.startX = this.cropData.x; // 크롭 박스의 시작 X 위치
+    this.cropData.startY = this.cropData.y; // 크롭 박스의 시작 Y 위치
     this.cropData.startWidth = this.cropData.width;
     this.cropData.startHeight = this.cropData.height;
+    this.cropData.mouseStartX = e.clientX; // 마우스 시작 X 위치
+    this.cropData.mouseStartY = e.clientY; // 마우스 시작 Y 위치
     e.preventDefault();
     e.stopPropagation();
   }
@@ -118,8 +124,8 @@ export class CropManager {
 
     if (this.cropData.isDragging) {
       // 드래그 처리 - 가운데 영역을 잡고 드래그
-      let newX = e.clientX - this.cropData.startX;
-      let newY = e.clientY - this.cropData.startY;
+      let newX = e.clientX - this.cropData.dragStartX;
+      let newY = e.clientY - this.cropData.dragStartY;
 
       // 경계 체크 - 이미지를 벗어나지 않도록
       newX = Math.max(0, Math.min(newX, imgRect.width - this.cropData.width));
@@ -128,9 +134,9 @@ export class CropManager {
       this.cropData.x = newX;
       this.cropData.y = newY;
     } else if (this.cropData.isResizing) {
-      // 리사이즈 처리 - 시작 크기 기준으로 계산
-      const deltaX = e.clientX - this.cropData.startX;
-      const deltaY = e.clientY - this.cropData.startY;
+      // 리사이즈 처리 - 마우스 이동 거리 기준으로 계산
+      const deltaX = e.clientX - this.cropData.mouseStartX;
+      const deltaY = e.clientY - this.cropData.mouseStartY;
 
       switch (this.cropData.resizeHandle) {
         case 'se':

@@ -159,6 +159,7 @@ export class ImageProcessor {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
+      const self = this; // this 컨텍스트 저장
 
       img.onload = function() {
         // 실제 이미지 크기와 화면상 크기의 비율 계산
@@ -185,7 +186,7 @@ export class ImageProcessor {
         // 형식별 처리
         if (format === 'png') {
           // PNG는 별도 압축 처리
-          this.compressPNG(canvas, pngCompression).then(resolve);
+          self.compressPNG(canvas, pngCompression).then(resolve);
           return;
         }
 
@@ -196,7 +197,7 @@ export class ImageProcessor {
         switch (format) {
           case 'webp':
             // WebP 지원 확인
-            if (this.isWebPSupported()) {
+            if (self.isWebPSupported()) {
               mimeType = 'image/webp';
               quality = webpQuality;
             } else {
@@ -217,7 +218,7 @@ export class ImageProcessor {
         canvas.toBlob(function(blob) {
           resolve(blob);
         }, mimeType, quality);
-      }.bind(this);
+      };
 
       img.onerror = () => reject(new Error('이미지 로드에 실패했습니다.'));
       img.src = URL.createObjectURL(blob);

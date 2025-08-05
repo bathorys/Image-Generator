@@ -295,9 +295,19 @@ export class ImageGeneratorApp {
   initCropEvents() {
     const elements = this.uiManager.getElements();
 
-    // 크롭 컨테이너 이벤트
+    // 크롭 컨테이너 이벤트 (이미지 영역)
     elements.cropImage.addEventListener('mousedown', (e) => {
       if (this.cropManager.isCropMode) {
+        this.cropManager.startCropDrag(e, elements.cropOverlay);
+        // 전역 마우스 이벤트 추가
+        document.addEventListener('mousemove', this.globalCropMouseMove);
+        document.addEventListener('mouseup', this.globalCropMouseUp);
+      }
+    });
+
+    // 크롭 오버레이 이벤트 (크롭 박스 자체)
+    elements.cropOverlay.addEventListener('mousedown', (e) => {
+      if (this.cropManager.isCropMode && !e.target.classList.contains('crop-handle')) {
         this.cropManager.startCropDrag(e, elements.cropOverlay);
         // 전역 마우스 이벤트 추가
         document.addEventListener('mousemove', this.globalCropMouseMove);
@@ -347,9 +357,24 @@ export class ImageGeneratorApp {
       }
     });
 
-    // 터치 이벤트 지원
+    // 터치 이벤트 지원 (이미지 영역)
     elements.cropImage.addEventListener('touchstart', (e) => {
       if (this.cropManager.isCropMode) {
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousedown', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        this.cropManager.startCropDrag(mouseEvent, elements.cropOverlay);
+        // 전역 터치 이벤트 추가
+        document.addEventListener('touchmove', this.globalCropTouchMove);
+        document.addEventListener('touchend', this.globalCropTouchEnd);
+      }
+    });
+
+    // 터치 이벤트 지원 (크롭 박스 자체)
+    elements.cropOverlay.addEventListener('touchstart', (e) => {
+      if (this.cropManager.isCropMode && !e.target.classList.contains('crop-handle')) {
         const touch = e.touches[0];
         const mouseEvent = new MouseEvent('mousedown', {
           clientX: touch.clientX,

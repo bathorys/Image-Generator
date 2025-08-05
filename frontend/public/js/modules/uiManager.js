@@ -67,8 +67,8 @@ export class UIManager {
       zoomInBtn: document.getElementById('zoomInBtn'),
       resetZoomBtn: document.getElementById('resetZoomBtn'),
       zoomLevel: document.getElementById('zoomLevel'),
-      originalImageContainer: document.querySelector('#originalImage').parentElement,
-      processedImageContainer: document.querySelector('#processedImage').parentElement
+      originalPreviewBox: document.getElementById('originalImage').closest('.preview-box'),
+      processedPreviewBox: document.getElementById('processedImage').closest('.preview-box')
     };
   }
 

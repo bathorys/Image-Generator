@@ -104,7 +104,7 @@ export class ImageGeneratorApp {
   // 확대/축소 및 드래그 기능 초기화
   initMagnifier() {
     const elements = this.uiManager.getElements();
-    
+
     // 확대/축소 상태 관리
     this.zoomState = {
       scale: 1,
@@ -158,7 +158,7 @@ export class ImageGeneratorApp {
     this.applyZoom();
   }
 
-  // 확대/축소 적용
+    // 확대/축소 적용
   applyZoom() {
     const elements = this.uiManager.getElements();
     const transform = `scale(${this.zoomState.scale}) translate(${this.dragState.translateX}px, ${this.dragState.translateY}px)`;
@@ -172,13 +172,13 @@ export class ImageGeneratorApp {
     // 버튼 상태 업데이트
     this.updateZoomButtons();
     
-    // 컨테이너에 zoomed 클래스 추가/제거
-    const containers = [elements.originalImageContainer, elements.processedImageContainer];
-    containers.forEach(container => {
+    // preview-box에 zoomed 클래스 추가/제거
+    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
+    previewBoxes.forEach(box => {
       if (this.zoomState.scale > 1) {
-        container.classList.add('zoomed');
+        box.classList.add('zoomed');
       } else {
-        container.classList.remove('zoomed');
+        box.classList.remove('zoomed');
       }
     });
   }
@@ -186,35 +186,42 @@ export class ImageGeneratorApp {
   // 확대/축소 버튼 상태 업데이트
   updateZoomButtons() {
     const elements = this.uiManager.getElements();
-    
+
     elements.zoomInBtn.disabled = this.zoomState.scale >= this.zoomState.maxScale;
     elements.zoomOutBtn.disabled = this.zoomState.scale <= this.zoomState.minScale;
   }
 
-  // 드래그 이벤트 초기화
+    // 드래그 이벤트 초기화
   initDragEvents() {
     const elements = this.uiManager.getElements();
-    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
     
-    containers.forEach(container => {
-      container.addEventListener('mousedown', (e) => this.startDrag(e));
-      container.addEventListener('mousemove', (e) => this.drag(e));
-      container.addEventListener('mouseup', () => this.endDrag());
-      container.addEventListener('mouseleave', () => this.endDrag());
+    previewBoxes.forEach(box => {
+      box.addEventListener('mousedown', (e) => this.startDrag(e));
+      box.addEventListener('mousemove', (e) => this.drag(e));
+      box.addEventListener('mouseup', () => this.endDrag());
+      box.addEventListener('mouseleave', () => this.endDrag());
       
       // 터치 이벤트 지원
-      container.addEventListener('touchstart', (e) => this.startDrag(e));
-      container.addEventListener('touchmove', (e) => this.drag(e));
-      container.addEventListener('touchend', () => this.endDrag());
+      box.addEventListener('touchstart', (e) => this.startDrag(e));
+      box.addEventListener('touchmove', (e) => this.drag(e));
+      box.addEventListener('touchend', () => this.endDrag());
     });
   }
 
-  // 드래그 시작
+    // 드래그 시작
   startDrag(e) {
     if (this.zoomState.scale <= 1) return;
     
     e.preventDefault();
     this.dragState.isDragging = true;
+    
+    // 드래그 중일 때 transition 비활성화
+    const elements = this.uiManager.getElements();
+    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
+    previewBoxes.forEach(box => {
+      box.classList.add('dragging');
+    });
     
     const clientX = e.clientX || (e.touches && e.touches[0].clientX);
     const clientY = e.clientY || (e.touches && e.touches[0].clientY);
@@ -226,21 +233,28 @@ export class ImageGeneratorApp {
   // 드래그 중
   drag(e) {
     if (!this.dragState.isDragging || this.zoomState.scale <= 1) return;
-    
+
     e.preventDefault();
-    
+
     const clientX = e.clientX || (e.touches && e.touches[0].clientX);
     const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-    
+
     this.dragState.translateX = clientX - this.dragState.startX;
     this.dragState.translateY = clientY - this.dragState.startY;
-    
+
     this.applyZoom();
   }
 
   // 드래그 종료
   endDrag() {
     this.dragState.isDragging = false;
+    
+    // 드래그 종료 시 transition 다시 활성화
+    const elements = this.uiManager.getElements();
+    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
+    previewBoxes.forEach(box => {
+      box.classList.remove('dragging');
+    });
   }
 
   // 여러 사이즈로 다운로드

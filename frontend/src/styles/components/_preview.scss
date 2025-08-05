@@ -9,14 +9,7 @@
   margin-bottom: 30px;
 }
 
-.preview-box {
-  flex: 1;
-  border: 2px solid #eee;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  position: relative;
-}
+
 
 .preview-box h3 {
   margin-bottom: 15px;
@@ -136,10 +129,26 @@
   display: inline-block;
   overflow: hidden;
   border-radius: 8px;
+}
+
+// 드래그 가능한 preview-box
+.preview-box {
+  flex: 1;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
   cursor: grab;
+  transition: transform 0.3s ease;
 
   &.zoomed {
     cursor: grabbing;
+    
+    // 드래그 중일 때 transition 비활성화
+    &.dragging {
+      transition: none;
+    }
   }
 }
 

@@ -27,12 +27,28 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
-      - name: Install, build, and upload your site
-        uses: withastro/action@v1
-        # with:
-        #   path: . # The root location of your Astro project inside the repository. (optional)
-        #   node-version: 18 # The specific version of Node that should be used to build your site. Defaults to 18. (optional)
-        #   package-manager: pnpm # The Node package manager that should be used to install dependencies. (optional)
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Build Astro site
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: Upload build output
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
 
   # Deployment job
   deploy:
@@ -44,4 +60,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4

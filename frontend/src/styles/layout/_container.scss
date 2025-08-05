@@ -1,0 +1,12 @@
+.container {
+  max-width: $breakpoint-xl;
+  margin: 0 auto;
+  background: white;
+  border-radius: $border-radius-xxl;
+  box-shadow: $shadow-xl;
+  overflow: hidden;
+}
+
+.main-content {
+  padding: $spacing-xxl;
+}

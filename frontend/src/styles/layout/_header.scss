@@ -1,0 +1,16 @@
+.header {
+  background: $primary-gradient;
+  color: white;
+  padding: $spacing-xxl;
+  text-align: center;
+
+  h1 {
+    font-size: $font-size-xxxl;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    font-size: $font-size-lg;
+    opacity: 0.9;
+  }
+}

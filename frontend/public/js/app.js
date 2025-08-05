@@ -1,0 +1,389 @@
+// 메인 애플리케이션
+import { ImageProcessor } from './modules/imageProcessor.js';
+import { CropManager } from './modules/cropManager.js';
+import { FileUploader } from './modules/fileUploader.js';
+import { UIManager } from './modules/uiManager.js';
+
+export class ImageGeneratorApp {
+  constructor() {
+    this.imageProcessor = new ImageProcessor();
+    this.cropManager = new CropManager();
+    this.fileUploader = new FileUploader();
+    this.uiManager = new UIManager();
+    this.processedBlob = null;
+  }
+
+  // 애플리케이션 초기화
+  init() {
+    this.uiManager.initializeElements();
+    this.bindEvents();
+    this.initMagnifier();
+    this.initFormatControls();
+  }
+
+  // 이벤트 바인딩
+  bindEvents() {
+    const elements = this.uiManager.getElements();
+
+    // 파일 업로드 이벤트
+    elements.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+
+    // 드래그 앤 드롭 이벤트
+    const uploadSection = elements.uploadSection;
+    uploadSection.addEventListener('click', () => elements.fileInput.click());
+    uploadSection.addEventListener('dragover', (e) => this.fileUploader.handleDragOver(e, uploadSection));
+    uploadSection.addEventListener('dragleave', (e) => this.fileUploader.handleDragLeave(e, uploadSection));
+    uploadSection.addEventListener('drop', (e) => this.handleFileDrop(e));
+
+    // 버튼 이벤트
+    elements.processBtn.addEventListener('click', () => this.processImage());
+    elements.cropBtn.addEventListener('click', () => this.toggleCropMode());
+    elements.downloadBtn.addEventListener('click', () => this.downloadImage());
+    elements.resetBtn.addEventListener('click', () => this.resetApp());
+
+    // 크롭 관련 이벤트
+    elements.applyCropBtn.addEventListener('click', () => this.applyCrop());
+    elements.cancelCropBtn.addEventListener('click', () => this.cancelCrop());
+
+    // 사이즈 별 다운로드 이벤트
+    elements.downloadMultiBtn.addEventListener('click', () => this.downloadMultipleSizes());
+  }
+
+  // 확장자별 컨트롤 초기화
+  initFormatControls() {
+    const elements = this.uiManager.getElements();
+
+    // 형식 선택 이벤트
+    elements.formatSelect.addEventListener('change', () => this.updateFormatControls());
+
+    // 슬라이더 이벤트
+    elements.jpegQualitySlider.addEventListener('input', () => {
+      elements.jpegQualityValue.textContent = elements.jpegQualitySlider.value + '%';
+    });
+
+    elements.pngCompressionSlider.addEventListener('input', () => {
+      elements.pngCompressionValue.textContent = elements.pngCompressionSlider.value;
+    });
+
+    elements.webpQualitySlider.addEventListener('input', () => {
+      elements.webpQualityValue.textContent = elements.webpQualitySlider.value + '%';
+    });
+
+    // 초기 상태 설정
+    this.updateFormatControls();
+  }
+
+  // 확장자별 컨트롤 업데이트
+  updateFormatControls() {
+    const elements = this.uiManager.getElements();
+    const format = elements.formatSelect.value;
+
+    // 모든 품질 그룹 숨기기
+    elements.jpegQualityGroup.style.display = 'none';
+    elements.pngCompressionGroup.style.display = 'none';
+    elements.webpQualityGroup.style.display = 'none';
+
+    // 선택된 형식에 따라 해당 그룹만 표시
+    switch (format) {
+      case 'jpeg':
+        elements.jpegQualityGroup.style.display = 'block';
+        break;
+      case 'png':
+        elements.pngCompressionGroup.style.display = 'block';
+        break;
+      case 'webp':
+        elements.webpQualityGroup.style.display = 'block';
+        break;
+      default:
+        // 원본 형식 유지 시 기본적으로 JPEG 품질 표시
+        elements.jpegQualityGroup.style.display = 'block';
+        break;
+    }
+  }
+
+  // 돋보기 기능 초기화
+  initMagnifier() {
+    const elements = this.uiManager.getElements();
+
+    // 이벤트 위임을 사용하여 preview-container 내의 모든 이미지 클릭 이벤트 처리
+    const previewContainer = document.querySelector('.preview-container');
+
+    if (previewContainer) {
+      previewContainer.addEventListener('click', (e) => {
+        // 클릭된 요소가 preview-image 클래스를 가진 이미지인지 확인
+        if (e.target.classList.contains('preview-image')) {
+          this.openModal(e.target.src);
+        }
+      });
+    }
+
+    // 모달 닫기 이벤트
+    if (elements.imageModal) {
+      elements.imageModal.addEventListener('click', () => this.closeModal());
+    }
+
+    if (elements.modalClose) {
+      elements.modalClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeModal();
+      });
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeModal();
+      }
+    });
+  }
+
+  // 모달 열기
+  openModal(imageSrc) {
+    const elements = this.uiManager.getElements();
+
+    if (!elements.modalImage || !elements.imageModal) {
+      return;
+    }
+
+    elements.modalImage.src = imageSrc;
+    elements.imageModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // 모달 닫기
+  closeModal() {
+    const elements = this.uiManager.getElements();
+
+    if (elements.imageModal) {
+      elements.imageModal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // 여러 사이즈로 다운로드
+  async downloadMultipleSizes() {
+    const originalFile = this.fileUploader.getOriginalFile();
+    if (!originalFile) {
+      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
+      return;
+    }
+
+    const selectedSizes = this.uiManager.getSelectedSizes();
+    if (selectedSizes.length === 0) {
+      this.uiManager.showAlert('최소 하나의 크기를 선택해주세요.');
+      return;
+    }
+
+    try {
+      const elements = this.uiManager.getElements();
+      const format = elements.formatSelect.value;
+
+      // 확장자별 설정 구성
+      const options = {
+        format: format,
+        jpegQuality: parseInt(elements.jpegQualitySlider.value) / 100,
+        pngCompression: parseInt(elements.pngCompressionSlider.value),
+        webpQuality: parseInt(elements.webpQualitySlider.value) / 100,
+        webpTransparency: elements.webpTransparency.checked,
+        maxWidth: parseInt(elements.maxWidth.value) || null,
+        maxHeight: parseInt(elements.maxHeight.value) || null
+      };
+
+      // 여러 사이즈로 이미지 처리
+      const results = await this.imageProcessor.processImageMultipleSizes(originalFile, selectedSizes, options);
+
+      // 각 사이즈별로 다운로드
+      for (const result of results) {
+        if (result.error) {
+          console.error(`사이즈 ${result.size}x 처리 실패:`, result.error);
+          continue;
+        }
+
+        const fileName = this.uiManager.generateFileName(originalFile.name, result.size);
+        this.uiManager.createDownloadLink(result.blob, fileName);
+      }
+
+      this.uiManager.showAlert(`${results.length}개 파일이 다운로드되었습니다.`);
+    } catch (error) {
+      console.error('다중 사이즈 다운로드 중 오류:', error);
+      this.uiManager.showAlert('다운로드 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 파일 드롭 처리
+  async handleFileDrop(e) {
+    const file = this.fileUploader.handleDrop(e, this.uiManager.getElement('uploadSection'));
+    if (file) {
+      await this.loadFile(file);
+    }
+  }
+
+  // 파일 선택 처리
+  async handleFileSelect(e) {
+    const file = this.fileUploader.handleFileSelect(e);
+    if (file) {
+      await this.loadFile(file);
+    }
+  }
+
+  // 파일 로드
+  async loadFile(file) {
+    try {
+      const dataURL = await this.fileUploader.readFileAsDataURL(file);
+      const elements = this.uiManager.getElements();
+
+      this.uiManager.setImageSource(elements.originalImage, dataURL);
+      this.uiManager.setImageSource(elements.processedImage, dataURL);
+      this.uiManager.showPreview();
+
+      // 원본 이미지 정보 업데이트
+      this.uiManager.updateOriginalImageInfo(file);
+    } catch (error) {
+      console.error('파일 로드 중 오류:', error);
+      this.uiManager.showAlert(error.message);
+    }
+  }
+
+  // 이미지 처리
+  async processImage() {
+    const originalFile = this.fileUploader.getOriginalFile();
+    if (!originalFile) {
+      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
+      return;
+    }
+
+    try {
+      const elements = this.uiManager.getElements();
+      const format = elements.formatSelect.value;
+
+      // 확장자별 설정 구성
+      const options = {
+        format: format,
+        jpegQuality: parseInt(elements.jpegQualitySlider.value) / 100,
+        pngCompression: parseInt(elements.pngCompressionSlider.value),
+        webpQuality: parseInt(elements.webpQualitySlider.value) / 100,
+        webpTransparency: elements.webpTransparency.checked,
+        maxWidth: parseInt(elements.maxWidth.value) || null,
+        maxHeight: parseInt(elements.maxHeight.value) || null
+      };
+
+      this.processedBlob = await this.imageProcessor.processImage(originalFile, options);
+      const url = URL.createObjectURL(this.processedBlob);
+      this.uiManager.setImageSource(elements.processedImage, url);
+
+      // 처리된 이미지 정보 업데이트
+      this.uiManager.updateProcessedImageInfo(this.processedBlob, originalFile);
+
+      // 사이즈 옵션 표시
+      this.uiManager.showSizeOptions();
+    } catch (error) {
+      console.error('이미지 처리 중 오류:', error);
+      this.uiManager.showAlert('이미지 처리 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 크롭 모드 토글
+  toggleCropMode() {
+    if (!this.processedBlob) {
+      this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
+      return;
+    }
+
+    const isCropMode = this.cropManager.toggleCropMode();
+    const elements = this.uiManager.getElements();
+
+    this.uiManager.toggleCropSection(isCropMode);
+
+    if (isCropMode) {
+      this.uiManager.setImageSource(elements.cropImage, elements.processedImage.src);
+      this.cropManager.initCrop(elements.cropImage, elements.cropOverlay);
+    }
+  }
+
+  // 크롭 마우스 이동 처리
+  handleCropMouseMove(e) {
+    const elements = this.uiManager.getElements();
+    this.cropManager.handleCropMouseMove(e, elements.cropImage, elements.cropOverlay);
+  }
+
+  // 크롭 적용
+  async applyCrop() {
+    if (!this.processedBlob) {
+      this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
+      return;
+    }
+
+    try {
+      const elements = this.uiManager.getElements();
+      const cropData = this.cropManager.getCropData();
+      const format = elements.formatSelect.value;
+      const originalFile = this.fileUploader.getOriginalFile();
+
+      // 이미지 크기 정보 추가
+      cropData.imageWidth = elements.cropImage.offsetWidth;
+      cropData.imageHeight = elements.cropImage.offsetHeight;
+
+      // 확장자별 설정 구성
+      const options = {
+        format: format,
+        jpegQuality: parseInt(elements.jpegQualitySlider.value) / 100,
+        pngCompression: parseInt(elements.pngCompressionSlider.value),
+        webpQuality: parseInt(elements.webpQualitySlider.value) / 100,
+        webpTransparency: elements.webpTransparency.checked
+      };
+
+      this.processedBlob = await this.imageProcessor.cropImage(this.processedBlob, cropData, options);
+      const url = URL.createObjectURL(this.processedBlob);
+      this.uiManager.setImageSource(elements.processedImage, url);
+
+      // 크롭된 이미지 정보 업데이트
+      this.uiManager.updateProcessedImageInfo(this.processedBlob, originalFile);
+
+      // 크롭 모드 종료
+      this.cancelCrop();
+
+      // 성공 메시지
+      const originalSize = this.imageProcessor.formatFileSize(originalFile.size);
+      const newSize = this.imageProcessor.formatFileSize(this.processedBlob.size);
+      this.uiManager.showSuccessMessage(originalSize, newSize);
+    } catch (error) {
+      console.error('크롭 처리 중 오류:', error);
+      this.uiManager.showAlert('크롭 처리 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 크롭 취소
+  cancelCrop() {
+    const elements = this.uiManager.getElements();
+    this.cropManager.cancelCrop(elements.cropOverlay);
+    this.uiManager.toggleCropSection(false);
+  }
+
+  // 이미지 다운로드
+  downloadImage() {
+    if (!this.processedBlob) {
+      this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
+      return;
+    }
+
+    const elements = this.uiManager.getElements();
+    const format = elements.formatSelect.value || 'jpg';
+    const filename = `processed_image.${format}`;
+
+    this.uiManager.createDownloadLink(this.processedBlob, filename);
+  }
+
+  // 앱 리셋
+  resetApp() {
+    this.fileUploader.reset();
+    this.processedBlob = null;
+    this.cropManager.cancelCrop(this.uiManager.getElement('cropOverlay'));
+    this.uiManager.resetApp();
+  }
+}
+
+// 애플리케이션 초기화
+document.addEventListener('DOMContentLoaded', () => {
+  const app = new ImageGeneratorApp();
+  app.init();
+});

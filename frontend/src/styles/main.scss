@@ -1,0 +1,12 @@
+// 메인 SCSS 파일
+@import './base/reset';
+@import './base/variables';
+@import './base/typography';
+@import './components/buttons';
+@import './components/upload';
+@import './components/preview';
+@import './components/controls';
+@import './components/crop';
+@import './layout/header';
+@import './layout/container';
+@import './utilities/responsive';

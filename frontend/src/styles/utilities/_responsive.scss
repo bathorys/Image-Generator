@@ -1,0 +1,61 @@
+// 반응형 스타일
+@media (max-width: $breakpoint-md) {
+  .container {
+    margin: $spacing-sm;
+    border-radius: $border-radius-xl;
+  }
+
+  .header {
+    padding: $spacing-xl $spacing-lg;
+
+    h1 {
+      font-size: $font-size-xxl;
+    }
+  }
+
+  .main-content {
+    padding: $spacing-lg;
+  }
+
+  .preview-container {
+    flex-direction: column;
+  }
+
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  body {
+    padding: $spacing-sm;
+  }
+
+  .header {
+    padding: $spacing-lg $spacing-md;
+
+    h1 {
+      font-size: $font-size-xl;
+    }
+
+    p {
+      font-size: $font-size-base;
+    }
+  }
+
+  .main-content {
+    padding: $spacing-md;
+  }
+
+  .upload-section {
+    padding: $spacing-xl $spacing-md;
+  }
+
+  .controls-section {
+    padding: $spacing-lg;
+  }
+}

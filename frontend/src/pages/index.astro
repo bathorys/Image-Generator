@@ -1,0 +1,186 @@
+---
+// Astro 페이지 컴포넌트
+import '@/styles/main.scss';
+---
+
+<html lang="ko">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Image Generator - 이미지 변환 및 최적화</title>
+	</head>
+	<body>
+		<div class="container">
+			<header class="header">
+				<h1>🖼️ Image Generator</h1>
+				<p>이미지 변환, 크롭, 최적화를 한 번에!</p>
+			</header>
+
+			<main class="main-content">
+				<div class="upload-section" id="uploadSection">
+					<div class="upload-icon">📁</div>
+					<div class="upload-text">이미지를 선택하거나 드래그하여 업로드하세요</div>
+					<div class="upload-hint">JPG, PNG, GIF 파일을 지원합니다</div>
+					<input type="file" id="fileInput" class="file-input" accept="image/*" />
+				</div>
+
+				<div class="preview-section" id="previewSection">
+					<div class="preview-container">
+						<div class="preview-box">
+							<h3>원본 이미지</h3>
+							<div class="preview-image-container">
+								<img id="originalImage" class="preview-image" alt="원본 이미지" />
+								<div class="magnifier"></div>
+							</div>
+							<div class="image-info" id="originalImageInfo">
+								<div class="info-item">
+									<span class="info-label">파일 크기:</span>
+									<span class="info-value" id="originalFileSize">-</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">이미지 크기:</span>
+									<span class="info-value" id="originalImageSize">-</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">형식:</span>
+									<span class="info-value" id="originalFormat">-</span>
+								</div>
+							</div>
+						</div>
+						<div class="preview-box">
+							<h3>처리된 이미지</h3>
+							<div class="preview-image-container">
+								<img id="processedImage" class="preview-image" alt="처리된 이미지" />
+								<div class="magnifier"></div>
+							</div>
+							<div class="image-info" id="processedImageInfo">
+								<div class="info-item">
+									<span class="info-label">파일 크기:</span>
+									<span class="info-value" id="processedFileSize">-</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">이미지 크기:</span>
+									<span class="info-value" id="processedImageSize">-</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">형식:</span>
+									<span class="info-value" id="processedFormat">-</span>
+								</div>
+								<div class="info-item compression-info" id="compressionInfo" style="display: none;">
+									<span class="info-label">압축률:</span>
+									<span class="info-value" id="compressionRatio">-</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="controls-section">
+						<div class="controls-grid">
+							<div class="control-group">
+								<label for="formatSelect">출력 형식</label>
+								<select id="formatSelect">
+									<option value="original">원본 형식 유지</option>
+									<option value="jpeg">JPEG</option>
+									<option value="png">PNG</option>
+									<option value="webp">WebP</option>
+								</select>
+							</div>
+
+							<!-- JPEG 품질 설정 -->
+							<div class="control-group" id="jpegQualityGroup">
+								<label for="jpegQualitySlider">JPEG 품질 (1-100)</label>
+								<input type="range" id="jpegQualitySlider" min="1" max="100" value="80" />
+								<span id="jpegQualityValue">80%</span>
+							</div>
+
+							<!-- PNG 압축 설정 -->
+							<div class="control-group" id="pngCompressionGroup" style="display: none;">
+								<label for="pngCompressionSlider">PNG 압축 레벨 (0-9)</label>
+								<input type="range" id="pngCompressionSlider" min="0" max="9" value="6" />
+								<span id="pngCompressionValue">6</span>
+								<small>0-3: 원본 크기, 4-6: 약간 축소, 7-9: 크게 축소</small>
+							</div>
+
+							<!-- WebP 품질 설정 -->
+							<div class="control-group" id="webpQualityGroup" style="display: none;">
+								<label for="webpQualitySlider">WebP 품질 (1-100)</label>
+								<input type="range" id="webpQualitySlider" min="1" max="100" value="80" />
+								<span id="webpQualityValue">80%</span>
+								<div class="checkbox-group">
+									<input type="checkbox" id="webpTransparency" />
+									<label for="webpTransparency">투명도 지원</label>
+								</div>
+							</div>
+
+							<div class="control-group">
+								<label for="maxWidth">최대 너비 (px)</label>
+								<input type="number" id="maxWidth" placeholder="자동" />
+							</div>
+							<div class="control-group">
+								<label for="maxHeight">최대 높이 (px)</label>
+								<input type="number" id="maxHeight" placeholder="자동" />
+							</div>
+						</div>
+
+						<div class="action-buttons">
+							<button class="btn btn-primary" id="processBtn">이미지 처리</button>
+							<button class="btn btn-secondary" id="cropBtn">크롭 모드</button>
+							<button class="btn btn-success" id="downloadBtn">다운로드</button>
+							<button class="btn btn-secondary" id="resetBtn">새로 시작</button>
+						</div>
+
+						<!-- 사이즈 별 저장 옵션 -->
+						<div class="size-options" id="sizeOptions" style="display: none;">
+							<h4>저장 크기 선택</h4>
+							<div class="size-checkboxes">
+								<div class="size-option">
+									<input type="checkbox" id="size1x" value="1" checked />
+									<label for="size1x">@x1 (원본 크기)</label>
+								</div>
+								<div class="size-option">
+									<input type="checkbox" id="size2x" value="2" />
+									<label for="size2x">@x2 (2배 크기)</label>
+								</div>
+								<div class="size-option">
+									<input type="checkbox" id="size3x" value="3" />
+									<label for="size3x">@x3 (3배 크기)</label>
+								</div>
+							</div>
+							<button class="btn btn-primary" id="downloadMultiBtn">선택한 크기로 다운로드</button>
+						</div>
+					</div>
+
+					<div class="crop-section" id="cropSection">
+						<h3>이미지 크롭</h3>
+						<p>드래그하여 크롭 영역을 선택하세요</p>
+						<div class="crop-container">
+							<img id="cropImage" class="crop-image" alt="크롭할 이미지" />
+							<div class="crop-overlay" id="cropOverlay">
+								<div class="crop-handle nw" id="cropHandleNW"></div>
+								<div class="crop-handle ne" id="cropHandleNE"></div>
+								<div class="crop-handle sw" id="cropHandleSW"></div>
+								<div class="crop-handle se" id="cropHandleSE"></div>
+							</div>
+						</div>
+						<div class="action-buttons">
+							<button class="btn btn-success" id="applyCropBtn">크롭 적용</button>
+							<button class="btn btn-secondary" id="cancelCropBtn">취소</button>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<!-- 이미지 전체화면 모달 -->
+		<div class="image-modal" id="imageModal">
+			<div class="modal-content">
+				<img id="modalImage" class="modal-image" alt="확대된 이미지" />
+				<button class="modal-close" id="modalClose">✕</button>
+			</div>
+		</div>
+
+		<script type="module" src="/js/app.js" client:load></script>
+	</body>
+</html>

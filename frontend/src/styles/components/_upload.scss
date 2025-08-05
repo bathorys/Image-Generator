@@ -1,0 +1,41 @@
+.upload-section {
+  border: 3px dashed $border-color;
+  border-radius: $border-radius-xl;
+  padding: $spacing-xxl $spacing-lg;
+  text-align: center;
+  margin-bottom: $spacing-xl;
+  transition: all $transition-base;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $primary-color;
+    background-color: rgba($primary-color, 0.05);
+  }
+
+  &.dragover {
+    border-color: $primary-color;
+    background-color: rgba($primary-color, 0.1);
+    transform: scale(1.02);
+  }
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: $primary-color;
+  margin-bottom: $spacing-lg;
+}
+
+.upload-text {
+  font-size: $font-size-xl;
+  color: $text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.upload-hint {
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+.file-input {
+  display: none;
+}

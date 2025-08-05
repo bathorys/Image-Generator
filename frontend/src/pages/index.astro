@@ -49,6 +49,15 @@ import '@/styles/main.scss';
 								</div>
 							</div>
 						</div>
+						
+						<!-- 확대/축소 컨트롤 -->
+						<div class="zoom-controls">
+							<button class="zoom-btn" id="zoomOutBtn" title="축소">−</button>
+							<span class="zoom-level" id="zoomLevel">100%</span>
+							<button class="zoom-btn" id="zoomInBtn" title="확대">+</button>
+							<button class="zoom-btn" id="resetZoomBtn" title="원본 크기">⟲</button>
+						</div>
+						
 						<div class="preview-box">
 							<h3>처리된 이미지</h3>
 							<div class="preview-image-container">
@@ -173,13 +182,7 @@ import '@/styles/main.scss';
 			</main>
 		</div>
 
-		<!-- 이미지 전체화면 모달 -->
-		<div class="image-modal" id="imageModal">
-			<div class="modal-content">
-				<img id="modalImage" class="modal-image" alt="확대된 이미지" />
-				<button class="modal-close" id="modalClose">✕</button>
-			</div>
-		</div>
+
 
 		<script type="module" src={import.meta.env.BASE_URL + '/js/app.js'} client:load></script>
 	</body>

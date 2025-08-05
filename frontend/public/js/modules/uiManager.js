@@ -62,10 +62,13 @@ export class UIManager {
       cropHandleSE: document.getElementById('cropHandleSE'),
       applyCropBtn: document.getElementById('applyCropBtn'),
       cancelCropBtn: document.getElementById('cancelCropBtn'),
-      // 모달 관련 요소들
-      imageModal: document.getElementById('imageModal'),
-      modalImage: document.getElementById('modalImage'),
-      modalClose: document.getElementById('modalClose')
+      // 확대/축소 관련 요소들
+      zoomOutBtn: document.getElementById('zoomOutBtn'),
+      zoomInBtn: document.getElementById('zoomInBtn'),
+      resetZoomBtn: document.getElementById('resetZoomBtn'),
+      zoomLevel: document.getElementById('zoomLevel'),
+      originalImageContainer: document.querySelector('#originalImage').parentElement,
+      processedImageContainer: document.querySelector('#processedImage').parentElement
     };
   }
 

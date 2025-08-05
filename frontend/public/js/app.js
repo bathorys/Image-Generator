@@ -101,63 +101,146 @@ export class ImageGeneratorApp {
     }
   }
 
-  // 돋보기 기능 초기화
+  // 확대/축소 및 드래그 기능 초기화
   initMagnifier() {
     const elements = this.uiManager.getElements();
+    
+    // 확대/축소 상태 관리
+    this.zoomState = {
+      scale: 1,
+      minScale: 0.5,
+      maxScale: 3,
+      step: 0.25
+    };
 
-    // 이벤트 위임을 사용하여 preview-container 내의 모든 이미지 클릭 이벤트 처리
-    const previewContainer = document.querySelector('.preview-container');
+    // 드래그 상태 관리
+    this.dragState = {
+      isDragging: false,
+      startX: 0,
+      startY: 0,
+      translateX: 0,
+      translateY: 0
+    };
 
-    if (previewContainer) {
-      previewContainer.addEventListener('click', (e) => {
-        // 클릭된 요소가 preview-image 클래스를 가진 이미지인지 확인
-        if (e.target.classList.contains('preview-image')) {
-          this.openModal(e.target.src);
-        }
-      });
+    // 확대/축소 버튼 이벤트
+    elements.zoomInBtn.addEventListener('click', () => this.zoomIn());
+    elements.zoomOutBtn.addEventListener('click', () => this.zoomOut());
+    elements.resetZoomBtn.addEventListener('click', () => this.resetZoom());
+
+    // 드래그 이벤트
+    this.initDragEvents();
+
+    // 초기 상태 업데이트
+    this.updateZoomButtons();
+  }
+
+  // 확대
+  zoomIn() {
+    if (this.zoomState.scale < this.zoomState.maxScale) {
+      this.zoomState.scale = Math.min(this.zoomState.maxScale, this.zoomState.scale + this.zoomState.step);
+      this.applyZoom();
     }
+  }
 
-    // 모달 닫기 이벤트
-    if (elements.imageModal) {
-      elements.imageModal.addEventListener('click', () => this.closeModal());
+  // 축소
+  zoomOut() {
+    if (this.zoomState.scale > this.zoomState.minScale) {
+      this.zoomState.scale = Math.max(this.zoomState.minScale, this.zoomState.scale - this.zoomState.step);
+      this.applyZoom();
     }
+  }
 
-    if (elements.modalClose) {
-      elements.modalClose.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.closeModal();
-      });
-    }
+  // 확대/축소 리셋
+  resetZoom() {
+    this.zoomState.scale = 1;
+    this.dragState.translateX = 0;
+    this.dragState.translateY = 0;
+    this.applyZoom();
+  }
 
-    // ESC 키로 모달 닫기
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.closeModal();
+  // 확대/축소 적용
+  applyZoom() {
+    const elements = this.uiManager.getElements();
+    const transform = `scale(${this.zoomState.scale}) translate(${this.dragState.translateX}px, ${this.dragState.translateY}px)`;
+    
+    elements.originalImage.style.transform = transform;
+    elements.processedImage.style.transform = transform;
+    
+    // 확대/축소 레벨 표시
+    elements.zoomLevel.textContent = `${Math.round(this.zoomState.scale * 100)}%`;
+    
+    // 버튼 상태 업데이트
+    this.updateZoomButtons();
+    
+    // 컨테이너에 zoomed 클래스 추가/제거
+    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+    containers.forEach(container => {
+      if (this.zoomState.scale > 1) {
+        container.classList.add('zoomed');
+      } else {
+        container.classList.remove('zoomed');
       }
     });
   }
 
-  // 모달 열기
-  openModal(imageSrc) {
+  // 확대/축소 버튼 상태 업데이트
+  updateZoomButtons() {
     const elements = this.uiManager.getElements();
-
-    if (!elements.modalImage || !elements.imageModal) {
-      return;
-    }
-
-    elements.modalImage.src = imageSrc;
-    elements.imageModal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    
+    elements.zoomInBtn.disabled = this.zoomState.scale >= this.zoomState.maxScale;
+    elements.zoomOutBtn.disabled = this.zoomState.scale <= this.zoomState.minScale;
   }
 
-  // 모달 닫기
-  closeModal() {
+  // 드래그 이벤트 초기화
+  initDragEvents() {
     const elements = this.uiManager.getElements();
+    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+    
+    containers.forEach(container => {
+      container.addEventListener('mousedown', (e) => this.startDrag(e));
+      container.addEventListener('mousemove', (e) => this.drag(e));
+      container.addEventListener('mouseup', () => this.endDrag());
+      container.addEventListener('mouseleave', () => this.endDrag());
+      
+      // 터치 이벤트 지원
+      container.addEventListener('touchstart', (e) => this.startDrag(e));
+      container.addEventListener('touchmove', (e) => this.drag(e));
+      container.addEventListener('touchend', () => this.endDrag());
+    });
+  }
 
-    if (elements.imageModal) {
-      elements.imageModal.classList.remove('active');
-      document.body.style.overflow = '';
-    }
+  // 드래그 시작
+  startDrag(e) {
+    if (this.zoomState.scale <= 1) return;
+    
+    e.preventDefault();
+    this.dragState.isDragging = true;
+    
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    this.dragState.startX = clientX - this.dragState.translateX;
+    this.dragState.startY = clientY - this.dragState.translateY;
+  }
+
+  // 드래그 중
+  drag(e) {
+    if (!this.dragState.isDragging || this.zoomState.scale <= 1) return;
+    
+    e.preventDefault();
+    
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    this.dragState.translateX = clientX - this.dragState.startX;
+    this.dragState.translateY = clientY - this.dragState.startY;
+    
+    this.applyZoom();
+  }
+
+  // 드래그 종료
+  endDrag() {
+    this.dragState.isDragging = false;
   }
 
   // 여러 사이즈로 다운로드

@@ -10,36 +10,81 @@ export class CropManager {
       isResizing: false,
       resizeHandle: null,
       startX: 0,
-      startY: 0
+      startY: 0,
+      startWidth: 0,
+      startHeight: 0
     };
     this.isCropMode = false;
   }
 
-  // 크롭 초기화
+      // 크롭 초기화
   initCrop(cropImage, cropOverlay) {
-    const imgRect = cropImage.getBoundingClientRect();
+    // 이미지가 로드되었는지 확인하고 크기 가져오기
+    const getImageSize = () => {
+      // 여러 방법으로 크기 가져오기 시도
+      let imgWidth = cropImage.offsetWidth;
+      let imgHeight = cropImage.offsetHeight;
 
-    // 이미지 크기의 80%로 초기 크롭 영역 설정
-    const initialWidth = imgRect.width * 0.8;
-    const initialHeight = imgRect.height * 0.8;
-    const initialX = (imgRect.width - initialWidth) / 2;
-    const initialY = (imgRect.height - initialHeight) / 2;
+      // offsetWidth/offsetHeight가 0이면 다른 방법 시도
+      if (imgWidth === 0 || imgHeight === 0) {
+        const rect = cropImage.getBoundingClientRect();
+        imgWidth = rect.width;
+        imgHeight = rect.height;
+      }
 
-    this.cropData.x = initialX;
-    this.cropData.y = initialY;
-    this.cropData.width = initialWidth;
-    this.cropData.height = initialHeight;
+      // 여전히 0이면 naturalWidth/naturalHeight 사용
+      if (imgWidth === 0 || imgHeight === 0) {
+        imgWidth = cropImage.naturalWidth;
+        imgHeight = cropImage.naturalHeight;
+      }
 
-    this.updateCropOverlay(cropOverlay);
-    cropOverlay.classList.add('active');
+            return { width: imgWidth, height: imgHeight };
+    };
+
+    const initializeCrop = () => {
+      const { width: imgWidth, height: imgHeight } = getImageSize();
+
+      // 크기가 여전히 0이면 재시도
+      if (imgWidth === 0 || imgHeight === 0) {
+        setTimeout(initializeCrop, 100);
+        return;
+      }
+
+      // 이미지 크기와 동일하게 초기 크롭 영역 설정
+      this.cropData.x = 0;
+      this.cropData.y = 0;
+      this.cropData.width = imgWidth;
+      this.cropData.height = imgHeight;
+
+      // 먼저 크기를 설정한 후 active 클래스 추가
+      this.updateCropOverlay(cropOverlay);
+
+      // 약간의 지연 후 active 클래스 추가 (크기가 적용된 후)
+      setTimeout(() => {
+        cropOverlay.classList.add('active');
+      }, 10);
+    };
+
+    // 이미지가 완전히 로드되었는지 확인
+    if (cropImage.complete && cropImage.naturalHeight !== 0) {
+      initializeCrop();
+    } else {
+      // 이미지 로드 완료를 기다림
+      cropImage.addEventListener('load', initializeCrop, { once: true });
+      // 이미 로드된 경우를 대비해 즉시 시도
+      setTimeout(initializeCrop, 100);
+    }
   }
 
   // 크롭 오버레이 업데이트
   updateCropOverlay(cropOverlay) {
-    cropOverlay.style.left = this.cropData.x + 'px';
-    cropOverlay.style.top = this.cropData.y + 'px';
-    cropOverlay.style.width = this.cropData.width + 'px';
-    cropOverlay.style.height = this.cropData.height + 'px';
+    // 크기가 유효한지 확인
+    if (this.cropData.width > 0 && this.cropData.height > 0) {
+      cropOverlay.style.left = this.cropData.x + 'px';
+      cropOverlay.style.top = this.cropData.y + 'px';
+      cropOverlay.style.width = this.cropData.width + 'px';
+      cropOverlay.style.height = this.cropData.height + 'px';
+    }
   }
 
   // 크롭 드래그 시작
@@ -58,6 +103,8 @@ export class CropManager {
     this.cropData.resizeHandle = handle;
     this.cropData.startX = e.clientX;
     this.cropData.startY = e.clientY;
+    this.cropData.startWidth = this.cropData.width;
+    this.cropData.startHeight = this.cropData.height;
     e.preventDefault();
     e.stopPropagation();
   }
@@ -70,45 +117,59 @@ export class CropManager {
     const minSize = 50; // 최소 크기
 
     if (this.cropData.isDragging) {
-      // 드래그 처리
+      // 드래그 처리 - 가운데 영역을 잡고 드래그
       let newX = e.clientX - this.cropData.startX;
       let newY = e.clientY - this.cropData.startY;
 
-      // 경계 체크
+      // 경계 체크 - 이미지를 벗어나지 않도록
       newX = Math.max(0, Math.min(newX, imgRect.width - this.cropData.width));
       newY = Math.max(0, Math.min(newY, imgRect.height - this.cropData.height));
 
       this.cropData.x = newX;
       this.cropData.y = newY;
     } else if (this.cropData.isResizing) {
-      // 리사이즈 처리
+      // 리사이즈 처리 - 시작 크기 기준으로 계산
       const deltaX = e.clientX - this.cropData.startX;
       const deltaY = e.clientY - this.cropData.startY;
 
       switch (this.cropData.resizeHandle) {
         case 'se':
-          this.cropData.width = Math.max(minSize, this.cropData.width + deltaX);
-          this.cropData.height = Math.max(minSize, this.cropData.height + deltaY);
+          this.cropData.width = Math.max(minSize, this.cropData.startWidth + deltaX);
+          this.cropData.height = Math.max(minSize, this.cropData.startHeight + deltaY);
           break;
         case 'sw':
-          this.cropData.width = Math.max(minSize, this.cropData.width - deltaX);
-          this.cropData.height = Math.max(minSize, this.cropData.height + deltaY);
-          this.cropData.x = Math.max(0, this.cropData.x + deltaX);
+          this.cropData.width = Math.max(minSize, this.cropData.startWidth - deltaX);
+          this.cropData.height = Math.max(minSize, this.cropData.startHeight + deltaY);
+          this.cropData.x = Math.max(0, this.cropData.startX + deltaX);
           break;
         case 'ne':
-          this.cropData.width = Math.max(minSize, this.cropData.width + deltaX);
-          this.cropData.height = Math.max(minSize, this.cropData.height - deltaY);
-          this.cropData.y = Math.max(0, this.cropData.y + deltaY);
+          this.cropData.width = Math.max(minSize, this.cropData.startWidth + deltaX);
+          this.cropData.height = Math.max(minSize, this.cropData.startHeight - deltaY);
+          this.cropData.y = Math.max(0, this.cropData.startY + deltaY);
           break;
         case 'nw':
-          this.cropData.width = Math.max(minSize, this.cropData.width - deltaX);
-          this.cropData.height = Math.max(minSize, this.cropData.height - deltaY);
-          this.cropData.x = Math.max(0, this.cropData.x + deltaX);
-          this.cropData.y = Math.max(0, this.cropData.y + deltaY);
+          this.cropData.width = Math.max(minSize, this.cropData.startWidth - deltaX);
+          this.cropData.height = Math.max(minSize, this.cropData.startHeight - deltaY);
+          this.cropData.x = Math.max(0, this.cropData.startX + deltaX);
+          this.cropData.y = Math.max(0, this.cropData.startY + deltaY);
+          break;
+        case 'n':
+          this.cropData.height = Math.max(minSize, this.cropData.startHeight - deltaY);
+          this.cropData.y = Math.max(0, this.cropData.startY + deltaY);
+          break;
+        case 's':
+          this.cropData.height = Math.max(minSize, this.cropData.startHeight + deltaY);
+          break;
+        case 'e':
+          this.cropData.width = Math.max(minSize, this.cropData.startWidth + deltaX);
+          break;
+        case 'w':
+          this.cropData.width = Math.max(minSize, this.cropData.startWidth - deltaX);
+          this.cropData.x = Math.max(0, this.cropData.startX + deltaX);
           break;
       }
 
-      // 경계 체크
+      // 경계 체크 - 이미지를 벗어나지 않도록
       if (this.cropData.x + this.cropData.width > imgRect.width) {
         this.cropData.width = imgRect.width - this.cropData.x;
       }

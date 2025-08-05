@@ -32,7 +32,6 @@ import '@/styles/main.scss';
 							<h3>원본 이미지</h3>
 							<div class="preview-image-container">
 								<img id="originalImage" class="preview-image" alt="원본 이미지" />
-								<div class="magnifier"></div>
 							</div>
 							<div class="image-info" id="originalImageInfo">
 								<div class="info-item">
@@ -62,7 +61,6 @@ import '@/styles/main.scss';
 							<h3>처리된 이미지</h3>
 							<div class="preview-image-container">
 								<img id="processedImage" class="preview-image" alt="처리된 이미지" />
-								<div class="magnifier"></div>
 							</div>
 							<div class="image-info" id="processedImageInfo">
 								<div class="info-item">
@@ -167,9 +165,14 @@ import '@/styles/main.scss';
 						<div class="crop-container">
 							<img id="cropImage" class="crop-image" alt="크롭할 이미지" />
 							<div class="crop-overlay" id="cropOverlay">
+								<!-- 모서리 핸들 -->
 								<div class="crop-handle nw" id="cropHandleNW"></div>
+								<div class="crop-handle n" id="cropHandleN"></div>
 								<div class="crop-handle ne" id="cropHandleNE"></div>
+								<div class="crop-handle w" id="cropHandleW"></div>
+								<div class="crop-handle e" id="cropHandleE"></div>
 								<div class="crop-handle sw" id="cropHandleSW"></div>
+								<div class="crop-handle s" id="cropHandleS"></div>
 								<div class="crop-handle se" id="cropHandleSE"></div>
 							</div>
 						</div>

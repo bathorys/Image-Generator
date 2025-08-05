@@ -57,8 +57,12 @@ export class UIManager {
       cropImage: document.getElementById('cropImage'),
       cropOverlay: document.getElementById('cropOverlay'),
       cropHandleNW: document.getElementById('cropHandleNW'),
+      cropHandleN: document.getElementById('cropHandleN'),
       cropHandleNE: document.getElementById('cropHandleNE'),
+      cropHandleW: document.getElementById('cropHandleW'),
+      cropHandleE: document.getElementById('cropHandleE'),
       cropHandleSW: document.getElementById('cropHandleSW'),
+      cropHandleS: document.getElementById('cropHandleS'),
       cropHandleSE: document.getElementById('cropHandleSE'),
       applyCropBtn: document.getElementById('applyCropBtn'),
       cancelCropBtn: document.getElementById('cancelCropBtn'),
@@ -67,8 +71,8 @@ export class UIManager {
       zoomInBtn: document.getElementById('zoomInBtn'),
       resetZoomBtn: document.getElementById('resetZoomBtn'),
       zoomLevel: document.getElementById('zoomLevel'),
-      originalPreviewBox: document.getElementById('originalImage').closest('.preview-box'),
-      processedPreviewBox: document.getElementById('processedImage').closest('.preview-box')
+      originalImageContainer: document.getElementById('originalImage').parentElement,
+      processedImageContainer: document.getElementById('processedImage').parentElement
     };
   }
 

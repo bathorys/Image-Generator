@@ -130,6 +130,9 @@ export class ImageGeneratorApp {
     // 드래그 이벤트
     this.initDragEvents();
 
+    // 크롭 이벤트 초기화
+    this.initCropEvents();
+
     // 초기 상태 업데이트
     this.updateZoomButtons();
   }
@@ -155,30 +158,47 @@ export class ImageGeneratorApp {
     this.zoomState.scale = 1;
     this.dragState.translateX = 0;
     this.dragState.translateY = 0;
+
+        // transition 복원 후 확대/축소 적용
+    const elements = this.uiManager.getElements();
+    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+    const images = [elements.originalImage, elements.processedImage];
+
+    containers.forEach(container => {
+      container.classList.remove('dragging');
+      container.style.transition = '';
+    });
+
+    images.forEach(img => {
+      img.style.transition = '';
+    });
+
     this.applyZoom();
   }
 
-    // 확대/축소 적용
+      // 확대/축소 적용
   applyZoom() {
     const elements = this.uiManager.getElements();
     const transform = `scale(${this.zoomState.scale}) translate(${this.dragState.translateX}px, ${this.dragState.translateY}px)`;
-    
+
+    // 이미지에 transform 적용
     elements.originalImage.style.transform = transform;
     elements.processedImage.style.transform = transform;
-    
+
     // 확대/축소 레벨 표시
     elements.zoomLevel.textContent = `${Math.round(this.zoomState.scale * 100)}%`;
-    
+
     // 버튼 상태 업데이트
     this.updateZoomButtons();
-    
-    // preview-box에 zoomed 클래스 추가/제거
-    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
-    previewBoxes.forEach(box => {
+
+    // preview-image-container에 zoomed 클래스 추가/제거
+    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+    containers.forEach(container => {
       if (this.zoomState.scale > 1) {
-        box.classList.add('zoomed');
+        container.classList.add('zoomed');
       } else {
-        box.classList.remove('zoomed');
+        container.classList.remove('zoomed');
+        container.classList.remove('dragging'); // 확대 해제 시 dragging 클래스도 제거
       }
     });
   }
@@ -191,41 +211,48 @@ export class ImageGeneratorApp {
     elements.zoomOutBtn.disabled = this.zoomState.scale <= this.zoomState.minScale;
   }
 
-    // 드래그 이벤트 초기화
+      // 드래그 이벤트 초기화
   initDragEvents() {
     const elements = this.uiManager.getElements();
-    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
-    
-    previewBoxes.forEach(box => {
-      box.addEventListener('mousedown', (e) => this.startDrag(e));
-      box.addEventListener('mousemove', (e) => this.drag(e));
-      box.addEventListener('mouseup', () => this.endDrag());
-      box.addEventListener('mouseleave', () => this.endDrag());
-      
+    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+
+    containers.forEach(container => {
+      container.addEventListener('mousedown', (e) => this.startDrag(e));
+      container.addEventListener('mousemove', (e) => this.drag(e));
+      container.addEventListener('mouseup', () => this.endDrag());
+      container.addEventListener('mouseleave', () => this.endDrag());
+
       // 터치 이벤트 지원
-      box.addEventListener('touchstart', (e) => this.startDrag(e));
-      box.addEventListener('touchmove', (e) => this.drag(e));
-      box.addEventListener('touchend', () => this.endDrag());
+      container.addEventListener('touchstart', (e) => this.startDrag(e));
+      container.addEventListener('touchmove', (e) => this.drag(e));
+      container.addEventListener('touchend', () => this.endDrag());
     });
   }
 
-    // 드래그 시작
+      // 드래그 시작
   startDrag(e) {
     if (this.zoomState.scale <= 1) return;
-    
+
     e.preventDefault();
     this.dragState.isDragging = true;
-    
-    // 드래그 중일 때 transition 비활성화
+
+        // 드래그 중일 때 transition 완전히 비활성화
     const elements = this.uiManager.getElements();
-    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
-    previewBoxes.forEach(box => {
-      box.classList.add('dragging');
+    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+    const images = [elements.originalImage, elements.processedImage];
+
+    containers.forEach(container => {
+      container.classList.add('dragging');
+      container.style.transition = 'none';
     });
-    
+
+    images.forEach(img => {
+      img.style.transition = 'none';
+    });
+
     const clientX = e.clientX || (e.touches && e.touches[0].clientX);
     const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-    
+
     this.dragState.startX = clientX - this.dragState.translateX;
     this.dragState.startY = clientY - this.dragState.translateY;
   }
@@ -245,16 +272,117 @@ export class ImageGeneratorApp {
     this.applyZoom();
   }
 
-  // 드래그 종료
+      // 드래그 종료
   endDrag() {
     this.dragState.isDragging = false;
-    
+
     // 드래그 종료 시 transition 다시 활성화
     const elements = this.uiManager.getElements();
-    const previewBoxes = [elements.originalPreviewBox, elements.processedPreviewBox];
-    previewBoxes.forEach(box => {
-      box.classList.remove('dragging');
+    const containers = [elements.originalImageContainer, elements.processedImageContainer];
+    const images = [elements.originalImage, elements.processedImage];
+
+    containers.forEach(container => {
+      container.classList.remove('dragging');
+      container.style.transition = ''; // CSS 클래스의 transition으로 복원
     });
+
+    images.forEach(img => {
+      img.style.transition = ''; // CSS 클래스의 transition으로 복원
+    });
+  }
+
+    // 크롭 이벤트 초기화
+  initCropEvents() {
+    const elements = this.uiManager.getElements();
+
+    // 크롭 컨테이너 이벤트
+    elements.cropImage.addEventListener('mousedown', (e) => {
+      if (this.cropManager.isCropMode) {
+        this.cropManager.startCropDrag(e, elements.cropOverlay);
+        // 전역 마우스 이벤트 추가
+        document.addEventListener('mousemove', this.globalCropMouseMove);
+        document.addEventListener('mouseup', this.globalCropMouseUp);
+      }
+    });
+
+    // 전역 마우스 이벤트 핸들러를 인스턴스에 바인딩
+    this.globalCropMouseMove = (e) => {
+      if (this.cropManager.isCropMode) {
+        this.handleCropMouseMove(e);
+      }
+    };
+
+    this.globalCropMouseUp = () => {
+      if (this.cropManager.isCropMode) {
+        this.cropManager.stopCropInteraction();
+        // 전역 이벤트 제거
+        document.removeEventListener('mousemove', this.globalCropMouseMove);
+        document.removeEventListener('mouseup', this.globalCropMouseUp);
+      }
+    };
+
+    // 크롭 핸들 이벤트 (9개 핸들)
+    const handles = [
+      elements.cropHandleNW,
+      elements.cropHandleN,
+      elements.cropHandleNE,
+      elements.cropHandleW,
+      elements.cropHandleE,
+      elements.cropHandleSW,
+      elements.cropHandleS,
+      elements.cropHandleSE
+    ];
+
+    handles.forEach(handle => {
+      if (handle) {
+        handle.addEventListener('mousedown', (e) => {
+          if (this.cropManager.isCropMode) {
+            const handleType = handle.id.replace('cropHandle', '').toLowerCase();
+            this.cropManager.startCropResize(e, handleType);
+            // 전역 마우스 이벤트 추가
+            document.addEventListener('mousemove', this.globalCropMouseMove);
+            document.addEventListener('mouseup', this.globalCropMouseUp);
+          }
+        });
+      }
+    });
+
+    // 터치 이벤트 지원
+    elements.cropImage.addEventListener('touchstart', (e) => {
+      if (this.cropManager.isCropMode) {
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousedown', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        this.cropManager.startCropDrag(mouseEvent, elements.cropOverlay);
+        // 전역 터치 이벤트 추가
+        document.addEventListener('touchmove', this.globalCropTouchMove);
+        document.addEventListener('touchend', this.globalCropTouchEnd);
+      }
+    });
+
+    // 전역 터치 이벤트 핸들러
+    this.globalCropTouchMove = (e) => {
+      if (this.cropManager.isCropMode) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousemove', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        this.handleCropMouseMove(mouseEvent);
+      }
+    };
+
+    this.globalCropTouchEnd = () => {
+      if (this.cropManager.isCropMode) {
+        this.cropManager.stopCropInteraction();
+        // 전역 터치 이벤트 제거
+        document.removeEventListener('touchmove', this.globalCropTouchMove);
+        document.removeEventListener('touchend', this.globalCropTouchEnd);
+      }
+    };
   }
 
   // 여러 사이즈로 다운로드
@@ -454,6 +582,16 @@ export class ImageGeneratorApp {
     const elements = this.uiManager.getElements();
     this.cropManager.cancelCrop(elements.cropOverlay);
     this.uiManager.toggleCropSection(false);
+
+    // 전역 이벤트 정리
+    if (this.globalCropMouseMove) {
+      document.removeEventListener('mousemove', this.globalCropMouseMove);
+      document.removeEventListener('mouseup', this.globalCropMouseUp);
+    }
+    if (this.globalCropTouchMove) {
+      document.removeEventListener('touchmove', this.globalCropTouchMove);
+      document.removeEventListener('touchend', this.globalCropTouchEnd);
+    }
   }
 
   // 이미지 다운로드

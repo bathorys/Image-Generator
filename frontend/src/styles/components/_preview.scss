@@ -22,10 +22,19 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform; // 성능 최적화
+  transform-origin: center center; // 확대/축소 중심점 설정
 
   &:hover {
     transform: scale(1.05);
+  }
+
+  // 확대된 상태에서 hover 효과 비활성화
+  .preview-box.zoomed & {
+    &:hover {
+      transform: scale(1.05);
+    }
   }
 }
 
@@ -126,12 +135,32 @@
 // 확대/축소 가능한 이미지 컨테이너
 .preview-image-container {
   position: relative;
-  display: inline-block;
-  overflow: hidden;
-  border-radius: 8px;
+  display: block;
+  overflow: hidden; // 확대된 이미지가 넘치지 않도록
+  width: 100%;
+  height: 300px; // preview-box에서 헤더와 인포 영역을 제외한 고정 높이
+  margin: 10px 0;
+  cursor: grab;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.zoomed {
+    cursor: grabbing;
+
+    // 드래그 중일 때 transition 완전히 비활성화
+    &.dragging {
+      transition: none !important;
+
+      // 드래그 중인 이미지들도 transition 비활성화
+      img {
+        transition: none !important;
+      }
+    }
+  }
+
+
 }
 
-// 드래그 가능한 preview-box
+// preview-box
 .preview-box {
   flex: 1;
   border: 2px solid #eee;
@@ -139,45 +168,108 @@
   padding: 20px;
   text-align: center;
   position: relative;
-  cursor: grab;
-  transition: transform 0.3s ease;
-
-  &.zoomed {
-    cursor: grabbing;
-    
-    // 드래그 중일 때 transition 비활성화
-    &.dragging {
-      transition: none;
-    }
-  }
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 최신 easing 함수 사용
 }
 
-.preview-image-container:hover .magnifier {
-  opacity: 1;
-  visibility: visible;
+// 크롭 섹션 스타일
+.crop-section {
+  display: none;
+  margin-top: 30px;
+  text-align: center;
 }
 
-.magnifier {
+.crop-container {
+  position: relative;
+  display: inline-block;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px 0;
+  cursor: crosshair;
+}
+
+.crop-image {
+  max-width: 100%;
+  max-height: 400px;
+  display: block;
+}
+
+.crop-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  cursor: zoom-in;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none; // 이미지 클릭을 차단하지 않도록 설정
+  border: 2px solid #007bff;
+  background: rgba(0, 123, 255, 0.1);
+  cursor: move;
+  display: none;
 
-  &::after {
-    content: '🔍';
-    font-size: 24px;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  &.active {
+    display: block;
   }
 }
+
+.crop-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #007bff;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+
+  // 모서리 핸들
+  &.nw {
+    top: -6px;
+    left: -6px;
+    cursor: nw-resize;
+  }
+
+  &.ne {
+    top: -6px;
+    right: -6px;
+    cursor: ne-resize;
+  }
+
+  &.sw {
+    bottom: -6px;
+    left: -6px;
+    cursor: sw-resize;
+  }
+
+  &.se {
+    bottom: -6px;
+    right: -6px;
+    cursor: se-resize;
+  }
+
+  // 중간 핸들
+  &.n {
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: n-resize;
+  }
+
+  &.s {
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
+  }
+
+  &.e {
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%);
+    cursor: e-resize;
+  }
+
+  &.w {
+    top: 50%;
+    left: -6px;
+    transform: translateY(-50%);
+    cursor: w-resize;
+  }
+}
+
+
 

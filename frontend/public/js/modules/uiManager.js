@@ -66,6 +66,12 @@ export class UIManager {
       applyCropBtn: DOMSelector.action('apply-crop'),
       cancelCropBtn: DOMSelector.action('cancel-crop'),
 
+      // 크롭 정보 표시 요소들
+      cropX: DOMSelector.target('crop-x'),
+      cropY: DOMSelector.target('crop-y'),
+      cropWidth: DOMSelector.target('crop-width'),
+      cropHeight: DOMSelector.target('crop-height'),
+
       // 크롭 핸들들
       cropHandleNW: DOMSelector.cropHandle('nw'),
       cropHandleN: DOMSelector.cropHandle('n'),
@@ -387,5 +393,21 @@ export class UIManager {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // 크롭 정보 업데이트
+  updateCropInfo(x, y, width, height) {
+    if (this.elements.cropX) {
+      this.elements.cropX.value = Math.round(x);
+    }
+    if (this.elements.cropY) {
+      this.elements.cropY.value = Math.round(y);
+    }
+    if (this.elements.cropWidth) {
+      this.elements.cropWidth.value = Math.round(width);
+    }
+    if (this.elements.cropHeight) {
+      this.elements.cropHeight.value = Math.round(height);
+    }
   }
 }

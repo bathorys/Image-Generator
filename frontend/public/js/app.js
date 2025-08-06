@@ -477,6 +477,12 @@ export class ImageGeneratorApp {
         document.removeEventListener('touchend', this.globalCropTouchEnd);
       }
     };
+
+    // 크롭 정보 input 이벤트 리스너 추가
+    elements.cropX.addEventListener('input', () => this.handleCropInputChange());
+    elements.cropY.addEventListener('input', () => this.handleCropInputChange());
+    elements.cropWidth.addEventListener('input', () => this.handleCropInputChange());
+    elements.cropHeight.addEventListener('input', () => this.handleCropInputChange());
   }
 
   // 여러 사이즈로 다운로드 (크롭된 이미지 지원)
@@ -628,6 +634,9 @@ export class ImageGeneratorApp {
       const imageSource = this.processedBlob ? elements.processedImage.src : elements.originalImage.src;
       this.uiManager.setImageSource(elements.cropImage, imageSource);
       this.cropManager.initCrop(elements.cropImage, elements.cropOverlay);
+
+      // 초기 크롭 정보 업데이트
+      this.cropManager.updateCropInfo(this.uiManager);
     } else {
       // 크롭 모드 종료 시 버튼 텍스트 업데이트
       this.updateCropButtonText();
@@ -661,10 +670,25 @@ export class ImageGeneratorApp {
     this.updateButtonStates();
   }
 
-  // 크롭 마우스 이동 처리
+    // 크롭 마우스 이동 처리
   handleCropMouseMove(e) {
     const elements = this.uiManager.getElements();
     this.cropManager.handleCropMouseMove(e, elements.cropImage, elements.cropOverlay);
+
+    // 크롭 정보 실시간 업데이트
+    this.cropManager.updateCropInfo(this.uiManager);
+  }
+
+    // 크롭 input 값 변경 처리
+  handleCropInputChange() {
+    const elements = this.uiManager.getElements();
+    const x = parseInt(elements.cropX.value) || 0;
+    const y = parseInt(elements.cropY.value) || 0;
+    const width = parseInt(elements.cropWidth.value) || 1;
+    const height = parseInt(elements.cropHeight.value) || 1;
+
+        // input 값으로 크롭 영역 설정
+    this.cropManager.setCropFromInput(x, y, width, height, elements.cropImage, elements.cropOverlay);
   }
 
   // 크롭 적용

@@ -91,6 +91,34 @@ export class CropManager {
     }
   }
 
+  // 크롭 정보 업데이트 (UI 매니저에 전달)
+  updateCropInfo(uiManager) {
+    if (uiManager && uiManager.updateCropInfo) {
+      uiManager.updateCropInfo(
+        this.cropData.x,
+        this.cropData.y,
+        this.cropData.width,
+        this.cropData.height
+      );
+    }
+  }
+
+  // input 값으로 크롭 영역 설정
+  setCropFromInput(x, y, width, height, cropImage, cropOverlay) {
+    // 이미지의 실제 크기 사용 (offsetWidth/Height는 이미지의 실제 크기)
+    const imageWidth = cropImage.offsetWidth;
+    const imageHeight = cropImage.offsetHeight;
+
+    // 값 범위 제한
+    this.cropData.x = Math.max(0, Math.min(x, imageWidth - width));
+    this.cropData.y = Math.max(0, Math.min(y, imageHeight - height));
+    this.cropData.width = Math.max(1, Math.min(width, imageWidth - this.cropData.x));
+    this.cropData.height = Math.max(1, Math.min(height, imageHeight - this.cropData.y));
+
+        // 크롭 오버레이 업데이트
+    this.updateCropOverlay(cropOverlay);
+  }
+
   // 크롭 드래그 시작
   startCropDrag(e, cropOverlay) {
     if (e.target.classList.contains('crop-handle')) return;

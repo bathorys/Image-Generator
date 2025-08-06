@@ -175,6 +175,27 @@ import '@/styles/main.scss';
 					<div class="crop-section" data-component="crop-section">
 						<h3>이미지 크롭</h3>
 						<p>드래그하여 크롭 영역을 선택하세요</p>
+
+						<!-- 크롭 정보 입력 영역 -->
+						<div class="crop-info" data-component="crop-info">
+							<div class="crop-info-item">
+								<span class="crop-info-label">X:</span>
+								<input type="number" class="crop-info-input" data-target="crop-x" value="0" min="0" />
+							</div>
+							<div class="crop-info-item">
+								<span class="crop-info-label">Y:</span>
+								<input type="number" class="crop-info-input" data-target="crop-y" value="0" min="0" />
+							</div>
+							<div class="crop-info-item">
+								<span class="crop-info-label">Width:</span>
+								<input type="number" class="crop-info-input" data-target="crop-width" value="0" min="1" />
+							</div>
+							<div class="crop-info-item">
+								<span class="crop-info-label">Height:</span>
+								<input type="number" class="crop-info-input" data-target="crop-height" value="0" min="1" />
+							</div>
+						</div>
+
 						<div class="crop-container">
 							<img data-target="crop-image" class="crop-image" alt="크롭할 이미지" />
 							<div class="crop-overlay" data-target="crop-overlay">

@@ -6,6 +6,64 @@
   border-radius: $border-radius-lg;
 }
 
+// 크롭 정보 표시 영역
+.crop-info {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm;
+  background: white;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+  flex-wrap: wrap;
+}
+
+.crop-info-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  background: $light-color;
+  border-radius: $border-radius-sm;
+  min-width: 80px;
+}
+
+.crop-info-label {
+  font-weight: 600;
+  color: $text-primary;
+  font-size: $font-size-sm;
+}
+
+.crop-info-input {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: $primary-color;
+  font-size: $font-size-sm;
+  width: 60px;
+  padding: $spacing-xs;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  text-align: center;
+  background: white;
+  transition: $transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+  }
+
+  &:hover {
+    border-color: $primary-color;
+  }
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    opacity: 1;
+  }
+}
+
 .crop-container {
   position: relative;
   display: inline-block;

@@ -29,11 +29,11 @@ export class ImageGeneratorApp {
     // 초기 버튼 상태 설정
     this.updateButtonStates();
 
-    // 업로드 섹션 자동저장 버튼 초기 상태 설정
-    const elements = this.uiManager.getElements();
-    elements.uploadAutoSaveBtn.textContent = this.autoSaveEnabled ? '🔄 자동저장 ON' : '🔄 자동저장';
-    elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
-    elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
+    // 업로드 섹션 자동저장 버튼 초기 상태 설정 (제거됨 - HTML에 해당 요소가 없음)
+    // const elements = this.uiManager.getElements();
+    // elements.uploadAutoSaveBtn.textContent = this.autoSaveEnabled ? '🔄 자동저장 ON' : '🔄 자동저장';
+    // elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
+    // elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
   }
 
   // 이벤트 바인딩
@@ -63,9 +63,9 @@ export class ImageGeneratorApp {
     elements.autoSaveBtn.addEventListener('click', () => this.toggleAutoSave());
     elements.clearWorksBtn.addEventListener('click', () => this.clearAllWorks());
 
-    // 업로드 섹션 작업물 관련 버튼 이벤트
-    elements.uploadLoadWorkBtn.addEventListener('click', () => this.showWorkListModal());
-    elements.uploadAutoSaveBtn.addEventListener('click', () => this.toggleAutoSave());
+    // 업로드 섹션 작업물 관련 버튼 이벤트 (제거됨 - HTML에 해당 요소가 없음)
+    // elements.uploadLoadWorkBtn.addEventListener('click', () => this.showWorkListModal());
+    // elements.uploadAutoSaveBtn.addEventListener('click', () => this.toggleAutoSave());
 
     // 모달 관련 이벤트
     elements.closeWorkModal.addEventListener('click', () => this.hideWorkModal());
@@ -1188,10 +1188,10 @@ export class ImageGeneratorApp {
     elements.autoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
     elements.autoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
 
-    // 업로드 섹션 자동저장 버튼 업데이트
-    elements.uploadAutoSaveBtn.textContent = this.autoSaveEnabled ? '🔄 자동저장 ON' : '🔄 자동저장';
-    elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
-    elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
+    // 업로드 섹션 자동저장 버튼 업데이트 (제거됨 - HTML에 해당 요소가 없음)
+    // elements.uploadAutoSaveBtn.textContent = this.autoSaveEnabled ? '🔄 자동저장 ON' : '🔄 자동저장';
+    // elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
+    // elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
 
     this.uiManager.showAlert(
       this.autoSaveEnabled ? '자동 저장이 활성화되었습니다.' : '자동 저장이 비활성화되었습니다.'

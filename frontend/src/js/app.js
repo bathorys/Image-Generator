@@ -15,40 +15,77 @@ export class ImageGeneratorApp {
 
   // 애플리케이션 초기화
   init() {
+    console.log('애플리케이션 초기화 시작...');
+
+    // DOM이 준비되었는지 확인
+    if (document.readyState === 'loading') {
+      console.log('DOM이 아직 로딩 중입니다. 잠시 후 다시 시도합니다.');
+      setTimeout(() => this.init(), 100);
+      return;
+    }
+
     this.uiManager.initializeElements();
     this.bindEvents();
   }
 
   // 이벤트 바인딩
   bindEvents() {
+    console.log('이벤트 바인딩 시작...');
     const elements = this.uiManager.getElements();
 
+    // elements가 제대로 초기화되었는지 확인
+    if (!elements || Object.keys(elements).length === 0) {
+      console.warn('DOM 요소들이 초기화되지 않았습니다. 잠시 후 다시 시도합니다.');
+      setTimeout(() => this.bindEvents(), 100);
+      return;
+    }
+
     // 파일 업로드 이벤트
-    elements.uploadSection.addEventListener('click', () => elements.fileInput.click());
-    elements.uploadSection.addEventListener('dragover', (e) => this.fileUploader.handleDragOver(e, elements.uploadSection));
-    elements.uploadSection.addEventListener('dragleave', (e) => this.fileUploader.handleDragLeave(e, elements.uploadSection));
-    elements.uploadSection.addEventListener('drop', (e) => this.handleFileDrop(e));
-    elements.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+    if (elements.uploadSection) {
+      elements.uploadSection.addEventListener('click', () => elements.fileInput?.click());
+      elements.uploadSection.addEventListener('dragover', (e) => this.fileUploader.handleDragOver(e, elements.uploadSection));
+      elements.uploadSection.addEventListener('dragleave', (e) => this.fileUploader.handleDragLeave(e, elements.uploadSection));
+      elements.uploadSection.addEventListener('drop', (e) => this.handleFileDrop(e));
+    }
+    if (elements.fileInput) {
+      elements.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+    }
 
     // 컨트롤 이벤트
-    elements.qualitySlider.addEventListener('input', () => this.uiManager.updateQualityValue());
-    elements.processBtn.addEventListener('click', () => this.processImage());
-    elements.resetBtn.addEventListener('click', () => this.resetApp());
+    if (elements.jpegQualitySlider) {
+      elements.jpegQualitySlider.addEventListener('input', () => this.uiManager.updateQualityValue());
+    }
+    if (elements.processBtn) {
+      elements.processBtn.addEventListener('click', () => this.processImage());
+    }
+    if (elements.resetBtn) {
+      elements.resetBtn.addEventListener('click', () => this.resetApp());
+    }
 
     // 크롭 이벤트
-    elements.cropBtn.addEventListener('click', () => this.toggleCropMode());
-    elements.applyCropBtn.addEventListener('click', () => this.applyCrop());
-    elements.cancelCropBtn.addEventListener('click', () => this.cancelCrop());
+    if (elements.cropBtn) {
+      elements.cropBtn.addEventListener('click', () => this.toggleCropMode());
+    }
+    if (elements.applyCropBtn) {
+      elements.applyCropBtn.addEventListener('click', () => this.applyCrop());
+    }
+    if (elements.cancelCropBtn) {
+      elements.cancelCropBtn.addEventListener('click', () => this.cancelCrop());
+    }
 
     // 크롭 상호작용 이벤트
-    elements.cropOverlay.addEventListener('mousedown', (e) => this.cropManager.startCropDrag(e, elements.cropOverlay));
+    if (elements.cropOverlay) {
+      elements.cropOverlay.addEventListener('mousedown', (e) => this.cropManager.startCropDrag(e, elements.cropOverlay));
+    }
 
     // 모든 크롭 핸들에 이벤트 리스너 추가
     const cropHandles = ['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se'];
     cropHandles.forEach(position => {
       const handle = elements[`cropHandle${position.toUpperCase()}`];
-      if (handle) {
+      if (handle && typeof handle.addEventListener === 'function') {
         handle.addEventListener('mousedown', (e) => this.cropManager.startCropResize(e, position));
+      } else {
+        console.warn(`Crop handle ${position} not found or not an element`);
       }
     });
 
@@ -78,8 +115,12 @@ export class ImageGeneratorApp {
       const dataURL = await this.fileUploader.readFileAsDataURL(file);
       const elements = this.uiManager.getElements();
 
-      this.uiManager.setImageSource(elements.originalImage, dataURL);
-      this.uiManager.setImageSource(elements.processedImage, dataURL);
+      if (elements.originalImage) {
+        this.uiManager.setImageSource(elements.originalImage, dataURL);
+      }
+      if (elements.processedImage) {
+        this.uiManager.setImageSource(elements.processedImage, dataURL);
+      }
       this.uiManager.showPreview();
     } catch (error) {
       this.uiManager.showAlert(error.message);
@@ -98,7 +139,7 @@ export class ImageGeneratorApp {
       const elements = this.uiManager.getElements();
       const options = {
         format: elements.formatSelect.value,
-        quality: parseInt(elements.qualitySlider.value) / 100,
+        quality: parseInt(elements.jpegQualitySlider.value) / 100,
         maxWidth: parseInt(elements.maxWidth.value) || null,
         maxHeight: parseInt(elements.maxHeight.value) || null
       };
@@ -136,15 +177,21 @@ export class ImageGeneratorApp {
     // 크롭 마우스 이동 처리
   handleCropMouseMove(e) {
     const elements = this.uiManager.getElements();
-    this.cropManager.handleCropMouseMove(e, elements.cropImage, elements.cropOverlay);
+    if (elements.cropImage && elements.cropOverlay) {
+      this.cropManager.handleCropMouseMove(e, elements.cropImage, elements.cropOverlay);
 
-    // 크롭 정보 실시간 업데이트
-    this.cropManager.updateCropInfo(this.uiManager);
+      // 크롭 정보 실시간 업데이트
+      this.cropManager.updateCropInfo(this.uiManager);
+    }
   }
 
     // 크롭 input 값 변경 처리
   handleCropInputChange() {
     const elements = this.uiManager.getElements();
+    if (!elements.cropX || !elements.cropY || !elements.cropWidth || !elements.cropHeight || !elements.cropImage || !elements.cropOverlay) {
+      return;
+    }
+
     const x = parseInt(elements.cropX.value) || 0;
     const y = parseInt(elements.cropY.value) || 0;
     const width = parseInt(elements.cropWidth.value) || 1;
@@ -163,6 +210,11 @@ export class ImageGeneratorApp {
 
     try {
       const elements = this.uiManager.getElements();
+      if (!elements.cropImage || !elements.formatSelect || !elements.jpegQualitySlider) {
+        this.uiManager.showAlert('필요한 요소를 찾을 수 없습니다.');
+        return;
+      }
+
       const cropData = this.cropManager.getCropData();
 
       // 이미지 크기 정보 추가
@@ -171,7 +223,7 @@ export class ImageGeneratorApp {
 
       const options = {
         format: elements.formatSelect.value,
-        quality: parseInt(elements.qualitySlider.value) / 100
+        quality: parseInt(elements.jpegQualitySlider.value) / 100
       };
 
       this.processedBlob = await this.imageProcessor.cropImage(this.processedBlob, cropData, options);
@@ -195,7 +247,9 @@ export class ImageGeneratorApp {
   // 크롭 취소
   cancelCrop() {
     const elements = this.uiManager.getElements();
-    this.cropManager.cancelCrop(elements.cropOverlay);
+    if (elements.cropOverlay) {
+      this.cropManager.cancelCrop(elements.cropOverlay);
+    }
     this.uiManager.toggleCropSection(false);
   }
 
@@ -226,13 +280,30 @@ export class ImageGeneratorApp {
   resetApp() {
     this.fileUploader.reset();
     this.processedBlob = null;
-    this.cropManager.cancelCrop(this.uiManager.getElement('cropOverlay'));
+    const cropOverlay = this.uiManager.getElement('cropOverlay');
+    if (cropOverlay) {
+      this.cropManager.cancelCrop(cropOverlay);
+    }
     this.uiManager.resetApp();
   }
 }
 
 // 애플리케이션 초기화
-document.addEventListener('DOMContentLoaded', () => {
-  const app = new ImageGeneratorApp();
-  app.init();
-});
+function initializeApp() {
+  // DOM이 완전히 로드되었는지 확인
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+    return;
+  }
+
+  // 추가로 약간의 지연을 주어 DOM이 완전히 준비되도록 함
+  setTimeout(() => {
+    const app = new ImageGeneratorApp();
+    app.init();
+  }, 100);
+}
+
+// 페이지 로드 시 초기화
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', initializeApp);
+}

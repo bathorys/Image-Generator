@@ -56,8 +56,6 @@ export class UIManager {
       loadWorkBtn: DOMSelector.action('load-work'),
       autoSaveBtn: DOMSelector.action('toggle-auto-save'),
       clearWorksBtn: DOMSelector.action('clear-works'),
-      uploadLoadWorkBtn: DOMSelector.actionByTarget('load-work', 'upload'),
-      uploadAutoSaveBtn: DOMSelector.actionByTarget('toggle-auto-save', 'upload'),
 
       // 크롭 섹션
       cropSection: DOMSelector.component('crop-section'),

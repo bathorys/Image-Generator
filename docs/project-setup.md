@@ -49,17 +49,19 @@ ImageGenerator/
 │   │   │   └── utilities/   # 유틸리티 스타일
 │   │   │       └── _responsive.scss
 │   │   ├── js/              # JavaScript 모듈
-│   │   │   ├── app.js       # 메인 애플리케이션 (824줄)
+│   │   │   ├── app.js       # 메인 애플리케이션 (570줄)
 │   │   │   └── modules/     # 기능별 모듈
 │   │   │       ├── imageProcessor.js
-│   │   │       ├── cropManager.js
+│   │   │       ├── cropManager.js         # 크롭 기능 (통합 완료)
 │   │   │       ├── fileUploader.js
 │   │   │       ├── uiManager.js
 │   │   │       ├── workManager.js
 │   │   │       ├── cookieManager.js
 │   │   │       ├── magnifierManager.js    # 확대/축소 기능
 │   │   │       ├── settingsManager.js     # 설정 관리
-│   │   │       └── imageInfoManager.js    # 이미지 정보 관리
+│   │   │       ├── imageInfoManager.js    # 이미지 정보 관리
+│   │   │       ├── eventManager.js        # 이벤트 관리
+│   │   │       └── workModalManager.js    # 작업물 모달 관리
 │   │   ├── components/      # 재사용 가능한 컴포넌트
 │   │   └── utils/           # 유틸리티 함수
 │   │       └── imageUtils.js # 이미지 처리 유틸리티
@@ -103,9 +105,9 @@ npm run preview
 - **반응형 디자인**: `_responsive.scss`에서 모바일 최적화
 
 #### JavaScript 모듈 구조
-- **ImageGeneratorApp**: 메인 애플리케이션 클래스 (824줄)
+- **ImageGeneratorApp**: 메인 애플리케이션 클래스 (570줄)
 - **ImageProcessor**: 이미지 처리 및 변환 로직
-- **CropManager**: 크롭 기능 관리
+- **CropManager**: 크롭 기능 관리 (통합 완료)
 - **FileUploader**: 파일 업로드 및 드래그 앤 드롭 처리
 - **UIManager**: DOM 조작 및 UI 상태 관리
 - **WorkManager**: 작업물 저장/불러오기 관리
@@ -113,6 +115,8 @@ npm run preview
 - **MagnifierManager**: 확대/축소 및 드래그 기능
 - **SettingsManager**: 설정 관리 및 컨트롤 이벤트
 - **ImageInfoManager**: 이미지 정보 업데이트 및 압축률 계산
+- **EventManager**: 이벤트 바인딩 및 관리
+- **WorkModalManager**: 작업물 모달 관리
 
 ### 새로운 컴포넌트 추가
 1. `src/components/` 디렉토리에 새 컴포넌트 파일 생성
@@ -187,6 +191,18 @@ DOM 조작과 UI 상태를 관리합니다.
 - 원본/처리된 이미지 정보 표시
 - 파일 크기 및 이미지 크기 계산
 - 압축률 계산 및 표시
+
+### EventManager
+모든 이벤트 바인딩 및 관리를 담당합니다.
+- 파일 업로드, 버튼, 모달, 크롭 이벤트 통합 관리
+- 마우스/터치 이벤트 지원
+- 전역 이벤트 핸들러 관리
+
+### WorkModalManager
+작업물 모달 관리 기능을 담당합니다.
+- 작업물 저장/불러오기 모달 표시/숨김
+- 작업물 목록 생성 및 이벤트 처리
+- 모달 상태 및 입력값 관리
 
 ## 배포
 

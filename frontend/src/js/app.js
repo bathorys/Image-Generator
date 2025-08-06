@@ -7,6 +7,8 @@ import { WorkManager } from './modules/workManager.js';
 import { MagnifierManager } from './modules/magnifierManager.js';
 import { SettingsManager } from './modules/settingsManager.js';
 import { ImageInfoManager } from './modules/imageInfoManager.js';
+import { EventManager } from './modules/eventManager.js';
+import { WorkModalManager } from './modules/workModalManager.js';
 
 export class ImageGeneratorApp {
   constructor() {
@@ -18,6 +20,8 @@ export class ImageGeneratorApp {
     this.magnifierManager = new MagnifierManager(this.uiManager);
     this.settingsManager = new SettingsManager(this.uiManager, this);
     this.imageInfoManager = new ImageInfoManager(this.uiManager);
+    this.eventManager = new EventManager(this);
+    this.workModalManager = new WorkModalManager(this);
     this.autoSaveEnabled = false;
     this.processedBlob = null;
   }
@@ -25,7 +29,8 @@ export class ImageGeneratorApp {
       // 애플리케이션 초기화
   async init() {
     this.uiManager.initializeElements();
-    this.bindEvents();
+    this.eventManager.bindEvents();
+    this.eventManager.initCropEvents();
     this.magnifierManager.initMagnifier();
     this.settingsManager.initFormatControls();
 
@@ -36,50 +41,7 @@ export class ImageGeneratorApp {
     this.updateButtonStates();
   }
 
-  // 이벤트 바인딩
-  bindEvents() {
-    const elements = this.uiManager.getElements();
 
-    // 파일 업로드 이벤트
-    elements.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-
-    // 드래그 앤 드롭 이벤트
-    const uploadSection = elements.uploadSection;
-    uploadSection.addEventListener('click', () => elements.fileInput.click());
-    uploadSection.addEventListener('dragover', (e) => this.fileUploader.handleDragOver(e, uploadSection));
-    uploadSection.addEventListener('dragleave', (e) => this.fileUploader.handleDragLeave(e, uploadSection));
-    uploadSection.addEventListener('drop', (e) => this.handleFileDrop(e));
-
-    // 버튼 이벤트
-    elements.processBtn.addEventListener('click', () => this.processImage());
-    elements.cropBtn.addEventListener('click', () => this.toggleCropMode());
-
-    elements.resetImageBtn.addEventListener('click', () => this.resetImage());
-    elements.resetBtn.addEventListener('click', () => this.resetApp());
-
-    // 작업물 관련 버튼 이벤트
-    elements.saveWorkBtn.addEventListener('click', () => this.showSaveWorkModal());
-    elements.loadWorkBtn.addEventListener('click', () => this.showWorkListModal());
-    elements.autoSaveBtn.addEventListener('click', () => this.toggleAutoSave());
-    elements.clearWorksBtn.addEventListener('click', () => this.clearAllWorks());
-
-    // 업로드 섹션 작업물 관련 버튼 이벤트 (제거됨 - HTML에 해당 요소가 없음)
-    // elements.uploadLoadWorkBtn.addEventListener('click', () => this.showWorkListModal());
-    // elements.uploadAutoSaveBtn.addEventListener('click', () => this.toggleAutoSave());
-
-    // 모달 관련 이벤트
-    elements.closeWorkModal.addEventListener('click', () => this.hideWorkModal());
-    elements.closeWorkSaveModal.addEventListener('click', () => this.hideSaveWorkModal());
-    elements.confirmSaveWorkBtn.addEventListener('click', () => this.saveWork());
-    elements.cancelSaveWorkBtn.addEventListener('click', () => this.hideSaveWorkModal());
-
-    // 크롭 관련 이벤트
-    elements.applyCropBtn.addEventListener('click', () => this.applyCrop());
-    elements.cancelCropBtn.addEventListener('click', () => this.cancelCrop());
-
-    // 사이즈 별 다운로드 이벤트
-    elements.downloadMultiBtn.addEventListener('click', () => this.downloadMultipleSizes());
-  }
 
 
 
@@ -341,56 +303,17 @@ export class ImageGeneratorApp {
 
   // 크롭 모드 토글
   toggleCropMode() {
-    const originalFile = this.fileUploader.getOriginalFile();
-    if (!originalFile) {
-      this.uiManager.showWarningMessage('먼저 이미지를 업로드해주세요.');
-      return;
-    }
-
-    const isCropMode = this.cropManager.toggleCropMode();
-    const elements = this.uiManager.getElements();
-
-    this.uiManager.toggleCropSection(isCropMode);
-
-    if (isCropMode) {
-      // 처리된 이미지가 있으면 처리된 이미지를, 없으면 원본 이미지를 사용
-      const imageSource = this.processedBlob ? elements.processedImage.src : elements.originalImage.src;
-      this.uiManager.setImageSource(elements.cropImage, imageSource);
-      this.cropManager.initCrop(elements.cropImage, elements.cropOverlay);
-
-      // 초기 크롭 정보 업데이트
-      this.cropManager.updateCropInfo(this.uiManager);
-    } else {
-      // 크롭 모드 종료 시 버튼 텍스트 업데이트
-      this.updateCropButtonText();
-    }
+    this.cropManager.toggleCropMode(this);
   }
 
     // 버튼 상태 업데이트
   updateButtonStates() {
-    const elements = this.uiManager.getElements();
-    const originalFile = this.fileUploader.getOriginalFile();
-
-    // 크롭 버튼 텍스트 및 상태 업데이트
-    if (!originalFile) {
-      elements.cropBtn.textContent = '크롭 모드';
-      elements.cropBtn.disabled = true;
-    } else if (this.processedBlob) {
-      elements.cropBtn.textContent = '처리된 이미지 크롭';
-      elements.cropBtn.disabled = false;
-    } else {
-      elements.cropBtn.textContent = '원본 이미지 크롭';
-      elements.cropBtn.disabled = false;
-    }
-
-    // 다른 버튼들 상태 업데이트
-    elements.processBtn.disabled = !originalFile;
-    elements.resetImageBtn.disabled = !originalFile;
+    this.cropManager.updateCropButtonText(this);
   }
 
   // 크롭 버튼 텍스트 업데이트 (기존 함수 유지)
   updateCropButtonText() {
-    this.updateButtonStates();
+    this.cropManager.updateCropButtonText(this);
   }
 
     // 크롭 마우스 이동 처리
@@ -404,93 +327,17 @@ export class ImageGeneratorApp {
 
     // 크롭 input 값 변경 처리
   handleCropInputChange() {
-    const elements = this.uiManager.getElements();
-    const x = parseInt(elements.cropX.value) || 0;
-    const y = parseInt(elements.cropY.value) || 0;
-    const width = parseInt(elements.cropWidth.value) || 1;
-    const height = parseInt(elements.cropHeight.value) || 1;
-
-        // input 값으로 크롭 영역 설정
-    this.cropManager.setCropFromInput(x, y, width, height, elements.cropImage, elements.cropOverlay);
+    this.cropManager.handleCropInputChange(this);
   }
 
   // 크롭 적용
   async applyCrop() {
-    const originalFile = this.fileUploader.getOriginalFile();
-    if (!originalFile) {
-      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
-      return;
-    }
-
-    try {
-      const elements = this.uiManager.getElements();
-      const cropData = this.cropManager.getCropData();
-      const format = elements.formatSelect.value;
-
-      // 이미지 크기 정보 추가
-      cropData.imageWidth = elements.cropImage.offsetWidth;
-      cropData.imageHeight = elements.cropImage.offsetHeight;
-
-      // 확장자별 설정 구성
-      const options = {
-        format: format,
-        jpegQuality: parseInt(elements.jpegQualitySlider.value) / 100,
-        pngCompression: parseInt(elements.pngCompressionSlider.value),
-        webpQuality: parseInt(elements.webpQualitySlider.value) / 100,
-        webpTransparency: elements.webpTransparency.checked
-      };
-
-      // 크롭할 이미지 소스 결정 (처리된 이미지가 있으면 그것을, 없으면 원본 파일을 사용)
-      let sourceBlob = this.processedBlob;
-      let sourceFile = originalFile;
-
-      if (!sourceBlob) {
-        // 원본 파일을 Blob으로 변환
-        sourceBlob = originalFile;
-        sourceFile = originalFile;
-      }
-
-      this.processedBlob = await this.imageProcessor.cropImage(sourceBlob, cropData, options);
-      const url = URL.createObjectURL(this.processedBlob);
-      this.uiManager.setImageSource(elements.processedImage, url);
-
-      // 크롭된 이미지 정보 업데이트
-      this.imageInfoManager.updateProcessedImageInfo(this.processedBlob, sourceFile);
-
-      // 크롭 모드 종료
-      this.cancelCrop();
-
-      // 크롭 버튼 텍스트 업데이트
-      this.updateCropButtonText();
-
-      // 성공 메시지
-      const originalSize = this.imageProcessor.formatFileSize(sourceFile.size);
-      const newSize = this.imageProcessor.formatFileSize(this.processedBlob.size);
-      this.uiManager.showSuccessMessage(originalSize, newSize);
-    } catch (error) {
-      console.error('크롭 처리 중 오류:', error);
-      this.uiManager.showAlert('크롭 처리 중 오류가 발생했습니다.');
-    }
+    await this.cropManager.applyCrop(this);
   }
 
   // 크롭 취소
   cancelCrop() {
-    const elements = this.uiManager.getElements();
-    this.cropManager.cancelCrop(elements.cropOverlay);
-    this.uiManager.toggleCropSection(false);
-
-    // 전역 이벤트 정리
-    if (this.globalCropMouseMove) {
-      document.removeEventListener('mousemove', this.globalCropMouseMove);
-      document.removeEventListener('mouseup', this.globalCropMouseUp);
-    }
-    if (this.globalCropTouchMove) {
-      document.removeEventListener('touchmove', this.globalCropTouchMove);
-      document.removeEventListener('touchend', this.globalCropTouchEnd);
-    }
-
-    // 크롭 버튼 텍스트 업데이트
-    this.updateCropButtonText();
+    this.cropManager.cancelCropMode(this);
   }
 
   // 이미지 다운로드
@@ -570,133 +417,32 @@ export class ImageGeneratorApp {
 
   // 작업물 저장 모달 표시
   showSaveWorkModal() {
-    const originalFile = this.fileUploader.getOriginalFile();
-    if (!originalFile) {
-      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
-      return;
-    }
-
-    const elements = this.uiManager.getElements();
-    const workModal = elements.workSaveModal;
-
-    // 저장할 내용 미리보기 업데이트
-    elements.saveOriginalPreview.textContent = originalFile.name;
-    elements.saveProcessedPreview.textContent = this.processedBlob ? '있음' : '없음';
-    elements.saveSettingsPreview.textContent = this.getCurrentSettings().format;
-
-    workModal.style.display = 'block';
-    elements.workNameInput.focus();
+    this.workModalManager.showSaveWorkModal();
   }
 
   // 작업물 저장 모달 숨기기
   hideSaveWorkModal() {
-    const elements = this.uiManager.getElements();
-    elements.workSaveModal.style.display = 'none';
-    elements.workNameInput.value = '';
+    this.workModalManager.hideSaveWorkModal();
   }
 
   // 작업물 저장
   async saveWork() {
-    const elements = this.uiManager.getElements();
-    const workName = elements.workNameInput.value.trim();
-
-    if (!workName) {
-      this.uiManager.showWarningMessage('작업물 이름을 입력해주세요.');
-      return;
-    }
-
-    const originalFile = this.fileUploader.getOriginalFile();
-    const originalImage = elements.originalImage.src;
-    const processedImage = this.processedBlob ? elements.processedImage.src : null;
-    const settings = this.getCurrentSettings();
-
-    const workData = await this.workManager.createWorkData(originalImage, processedImage, settings, workName);
-    const success = await this.workManager.saveWork(workData);
-
-    if (success) {
-      this.uiManager.showSuccessMessage('작업물이 저장되었습니다.');
-      this.hideSaveWorkModal();
-    } else {
-      this.uiManager.showErrorMessage('작업물 저장에 실패했습니다.');
-    }
+    await this.workModalManager.saveWork();
   }
 
   // 작업물 목록 모달 표시
   async showWorkListModal() {
-    const elements = this.uiManager.getElements();
-    const workModal = elements.workModal;
-    const workList = elements.workList;
-    const workEmpty = elements.workEmpty;
-
-    const works = await this.workManager.getWorkList();
-
-    if (works.length === 0) {
-      workList.style.display = 'none';
-      workEmpty.style.display = 'block';
-    } else {
-      workList.style.display = 'grid';
-      workEmpty.style.display = 'none';
-
-      // 기존 목록 초기화
-      workList.innerHTML = '';
-
-      // 작업물 목록 생성
-      works.forEach(work => {
-        const workItem = this.createWorkItem(work);
-        workList.appendChild(workItem);
-      });
-    }
-
-    workModal.style.display = 'block';
+    await this.workModalManager.showWorkListModal();
   }
 
   // 작업물 목록 모달 숨기기
   hideWorkModal() {
-    const elements = this.uiManager.getElements();
-    elements.workModal.style.display = 'none';
+    this.workModalManager.hideWorkModal();
   }
 
   // 작업물 아이템 생성
   createWorkItem(work) {
-    const workItem = document.createElement('div');
-    workItem.className = 'work-item';
-    workItem.dataset.workId = work.id;
-
-    const date = new Date(work.createdAt).toLocaleString('ko-KR');
-
-    workItem.innerHTML = `
-      <img src="${work.thumbnail}" alt="${work.name}" class="work-thumbnail" />
-      <div class="work-name">${work.name}</div>
-      <div class="work-date">${date}</div>
-      <div class="work-info">
-        <div class="info-item">
-          <span>형식:</span>
-          <span>${work.settings.format}</span>
-        </div>
-        <div class="info-item">
-          <span>처리됨:</span>
-          <span>${work.processedImage ? '예' : '아니오'}</span>
-        </div>
-      </div>
-      <div class="work-actions">
-        <button class="btn btn-primary load-work-btn">불러오기</button>
-        <button class="btn btn-danger delete-work-btn">삭제</button>
-      </div>
-    `;
-
-    // 이벤트 리스너 추가
-    workItem.querySelector('.load-work-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.loadWork(work);
-      this.hideWorkModal();
-    });
-
-    workItem.querySelector('.delete-work-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.deleteWork(work.id);
-    });
-
-    return workItem;
+    return this.workModalManager.createWorkItem(work);
   }
 
     // 작업물 불러오기

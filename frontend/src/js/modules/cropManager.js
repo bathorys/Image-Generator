@@ -222,8 +222,8 @@ export class CropManager {
     this.cropData.resizeHandle = null;
   }
 
-  // 크롭 모드 토글
-  toggleCropMode() {
+  // 크롭 모드 토글 (내부용)
+  _toggleCropMode() {
     this.isCropMode = !this.isCropMode;
     return this.isCropMode;
   }
@@ -238,5 +238,136 @@ export class CropManager {
     this.isCropMode = false;
     cropOverlay.classList.remove('active');
     this.stopCropInteraction();
+  }
+
+  // 크롭 모드 토글 (앱에서 호출)
+  toggleCropMode(app) {
+    const originalFile = app.fileUploader.getOriginalFile();
+    if (!originalFile) {
+      app.uiManager.showWarningMessage('먼저 이미지를 업로드해주세요.');
+      return false;
+    }
+
+    const isCropMode = this._toggleCropMode();
+    const elements = app.uiManager.getElements();
+
+    app.uiManager.toggleCropSection(isCropMode);
+
+    if (isCropMode) {
+      // 처리된 이미지가 있으면 처리된 이미지를, 없으면 원본 이미지를 사용
+      const imageSource = app.processedBlob ? elements.processedImage.src : elements.originalImage.src;
+      app.uiManager.setImageSource(elements.cropImage, imageSource);
+      this.initCrop(elements.cropImage, elements.cropOverlay);
+
+      // 초기 크롭 정보 업데이트
+      this.updateCropInfo(app.uiManager);
+    } else {
+      // 크롭 모드 종료 시 버튼 텍스트 업데이트
+      this.updateCropButtonText(app);
+    }
+
+    return isCropMode;
+  }
+
+  // 크롭 버튼 텍스트 업데이트
+  updateCropButtonText(app) {
+    const elements = app.uiManager.getElements();
+    const originalFile = app.fileUploader.getOriginalFile();
+
+    // 크롭 버튼 텍스트 및 상태 업데이트
+    if (!originalFile) {
+      elements.cropBtn.textContent = '크롭 모드';
+      elements.cropBtn.disabled = true;
+    } else if (app.processedBlob) {
+      elements.cropBtn.textContent = '처리된 이미지 크롭';
+      elements.cropBtn.disabled = false;
+    } else {
+      elements.cropBtn.textContent = '원본 이미지 크롭';
+      elements.cropBtn.disabled = false;
+    }
+
+    // 다른 버튼들 상태 업데이트
+    elements.processBtn.disabled = !originalFile;
+    elements.resetImageBtn.disabled = !originalFile;
+  }
+
+  // 크롭 input 값 변경 처리
+  handleCropInputChange(app) {
+    const elements = app.uiManager.getElements();
+    const x = parseInt(elements.cropX.value) || 0;
+    const y = parseInt(elements.cropY.value) || 0;
+    const width = parseInt(elements.cropWidth.value) || 1;
+    const height = parseInt(elements.cropHeight.value) || 1;
+
+    // input 값으로 크롭 영역 설정
+    this.setCropFromInput(x, y, width, height, elements.cropImage, elements.cropOverlay);
+  }
+
+  // 크롭 적용
+  async applyCrop(app) {
+    const originalFile = app.fileUploader.getOriginalFile();
+    if (!originalFile) {
+      app.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
+      return;
+    }
+
+    try {
+      const elements = app.uiManager.getElements();
+      const cropData = this.getCropData();
+      const format = elements.formatSelect.value;
+
+      // 이미지 크기 정보 추가
+      cropData.imageWidth = elements.cropImage.offsetWidth;
+      cropData.imageHeight = elements.cropImage.offsetHeight;
+
+      // 확장자별 설정 구성
+      const options = {
+        format: format,
+        jpegQuality: parseInt(elements.jpegQualitySlider.value) / 100,
+        pngCompression: parseInt(elements.pngCompressionSlider.value),
+        webpQuality: parseInt(elements.webpQualitySlider.value) / 100,
+        webpTransparency: elements.webpTransparency.checked
+      };
+
+      // 크롭할 이미지 소스 결정 (처리된 이미지가 있으면 그것을, 없으면 원본 파일을 사용)
+      let sourceBlob = app.processedBlob;
+      let sourceFile = originalFile;
+
+      if (!sourceBlob) {
+        // 원본 파일을 Blob으로 변환
+        sourceBlob = originalFile;
+        sourceFile = originalFile;
+      }
+
+      app.processedBlob = await app.imageProcessor.cropImage(sourceBlob, cropData, options);
+      const url = URL.createObjectURL(app.processedBlob);
+      app.uiManager.setImageSource(elements.processedImage, url);
+
+      // 크롭된 이미지 정보 업데이트
+      app.imageInfoManager.updateProcessedImageInfo(app.processedBlob, sourceFile);
+
+      // 크롭 모드 종료
+      this.cancelCropMode(app);
+
+      // 성공 메시지
+      const originalSize = app.imageProcessor.formatFileSize(sourceFile.size);
+      const newSize = app.imageProcessor.formatFileSize(app.processedBlob.size);
+      app.uiManager.showSuccessMessage(originalSize, newSize);
+    } catch (error) {
+      console.error('크롭 처리 중 오류:', error);
+      app.uiManager.showAlert('크롭 처리 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 크롭 취소
+  cancelCropMode(app) {
+    const elements = app.uiManager.getElements();
+
+    // 크롭 모드 종료
+    this.cancelCrop(elements.cropOverlay);
+    app.uiManager.toggleCropSection(false);
+
+    // 버튼 상태 업데이트
+    this.updateCropButtonText(app);
   }
 }

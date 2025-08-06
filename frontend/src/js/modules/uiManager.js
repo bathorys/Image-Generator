@@ -48,7 +48,6 @@ export class UIManager {
       // 액션 버튼들
       processBtn: DOMSelector.action('process-image'),
       cropBtn: DOMSelector.action('crop-mode'),
-      downloadBtn: DOMSelector.action('download-image'),
       resetImageBtn: DOMSelector.action('reset-image'),
       resetBtn: DOMSelector.action('reset-all'),
 

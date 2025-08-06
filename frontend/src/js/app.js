@@ -33,7 +33,6 @@ export class ImageGeneratorApp {
     // 컨트롤 이벤트
     elements.qualitySlider.addEventListener('input', () => this.uiManager.updateQualityValue());
     elements.processBtn.addEventListener('click', () => this.processImage());
-    elements.downloadBtn.addEventListener('click', () => this.downloadImage());
     elements.resetBtn.addEventListener('click', () => this.resetApp());
 
     // 크롭 이벤트
@@ -182,17 +181,26 @@ export class ImageGeneratorApp {
     this.uiManager.toggleCropSection(false);
   }
 
-  // 이미지 다운로드
+  // 이미지 다운로드 (단일 사이즈)
   downloadImage() {
     if (!this.processedBlob) {
       this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
       return;
     }
 
-    const elements = this.uiManager.getElements();
-    const format = elements.formatSelect.value || 'jpg';
-    const filename = `processed_image.${format}`;
+    // blob의 MIME 타입에서 확장자 추출
+    const mimeType = this.processedBlob.type;
+    let extension = 'jpg';
 
+    if (mimeType === 'image/png') {
+      extension = 'png';
+    } else if (mimeType === 'image/webp') {
+      extension = 'webp';
+    } else if (mimeType === 'image/jpeg') {
+      extension = 'jpg';
+    }
+
+    const filename = `processed_image.${extension}`;
     this.uiManager.createDownloadLink(this.processedBlob, filename);
   }
 

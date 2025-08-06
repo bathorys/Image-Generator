@@ -53,7 +53,7 @@ export class ImageGeneratorApp {
     // 버튼 이벤트
     elements.processBtn.addEventListener('click', () => this.processImage());
     elements.cropBtn.addEventListener('click', () => this.toggleCropMode());
-    elements.downloadBtn.addEventListener('click', () => this.downloadImage());
+
     elements.resetImageBtn.addEventListener('click', () => this.resetImage());
     elements.resetBtn.addEventListener('click', () => this.resetApp());
 
@@ -479,10 +479,11 @@ export class ImageGeneratorApp {
     };
   }
 
-  // 여러 사이즈로 다운로드
+  // 여러 사이즈로 다운로드 (크롭된 이미지 지원)
   async downloadMultipleSizes() {
-    const originalFile = this.fileUploader.getOriginalFile();
-    if (!originalFile) {
+    // 처리된 이미지가 있으면 그것을 사용, 없으면 원본 파일 사용
+    const sourceBlob = this.processedBlob || this.fileUploader.getOriginalFile();
+    if (!sourceBlob) {
       this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
       return;
     }
@@ -509,7 +510,7 @@ export class ImageGeneratorApp {
       };
 
       // 여러 사이즈로 이미지 처리
-      const results = await this.imageProcessor.processImageMultipleSizes(originalFile, selectedSizes, options);
+      const results = await this.imageProcessor.processImageMultipleSizes(sourceBlob, selectedSizes, options);
 
       // 각 사이즈별로 다운로드
       for (const result of results) {
@@ -518,7 +519,9 @@ export class ImageGeneratorApp {
           continue;
         }
 
-        const fileName = this.uiManager.generateFileName(originalFile.name, result.size);
+        // 원본 파일명 또는 기본 파일명 사용
+        const originalFileName = this.fileUploader.getOriginalFile()?.name || 'image';
+        const fileName = this.uiManager.generateFileName(originalFileName, result.size);
         this.uiManager.createDownloadLink(result.blob, fileName);
       }
 
@@ -650,7 +653,6 @@ export class ImageGeneratorApp {
 
     // 다른 버튼들 상태 업데이트
     elements.processBtn.disabled = !originalFile;
-    elements.downloadBtn.disabled = !this.processedBlob;
     elements.resetImageBtn.disabled = !originalFile;
   }
 
@@ -745,16 +747,26 @@ export class ImageGeneratorApp {
   }
 
   // 이미지 다운로드
+  // 이미지 다운로드 (단일 사이즈)
   downloadImage() {
     if (!this.processedBlob) {
       this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
       return;
     }
 
-    const elements = this.uiManager.getElements();
-    const format = elements.formatSelect.value || 'jpg';
-    const filename = `processed_image.${format}`;
+    // blob의 MIME 타입에서 확장자 추출
+    const mimeType = this.processedBlob.type;
+    let extension = 'jpg';
 
+    if (mimeType === 'image/png') {
+      extension = 'png';
+    } else if (mimeType === 'image/webp') {
+      extension = 'webp';
+    } else if (mimeType === 'image/jpeg') {
+      extension = 'jpg';
+    }
+
+    const filename = `processed_image.${extension}`;
     this.uiManager.createDownloadLink(this.processedBlob, filename);
   }
 

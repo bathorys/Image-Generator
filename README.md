@@ -124,12 +124,17 @@ ImageGenerator/
 │   │   │   ├── layout/    # 레이아웃 스타일
 │   │   │   └── utilities/ # 유틸리티 스타일
 │   │   ├── js/            # JavaScript 모듈
-│   │   │   ├── app.js     # 메인 애플리케이션
+│   │   │   ├── app.js     # 메인 애플리케이션 (824줄)
 │   │   │   ├── modules/   # 기능별 모듈
 │   │   │   │   ├── imageProcessor.js
 │   │   │   │   ├── cropManager.js
 │   │   │   │   ├── fileUploader.js
-│   │   │   │   └── uiManager.js
+│   │   │   │   ├── uiManager.js
+│   │   │   │   ├── workManager.js
+│   │   │   │   ├── cookieManager.js
+│   │   │   │   ├── magnifierManager.js
+│   │   │   │   ├── settingsManager.js
+│   │   │   │   └── imageInfoManager.js
 │   │   │   └── utils/     # 유틸리티
 │   │   │       └── domSelector.js
 │   │   └── utils/         # 유틸리티 함수

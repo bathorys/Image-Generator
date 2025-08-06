@@ -4,14 +4,20 @@ import { CropManager } from './modules/cropManager.js';
 import { FileUploader } from './modules/fileUploader.js';
 import { UIManager } from './modules/uiManager.js';
 import { WorkManager } from './modules/workManager.js';
+import { MagnifierManager } from './modules/magnifierManager.js';
+import { SettingsManager } from './modules/settingsManager.js';
+import { ImageInfoManager } from './modules/imageInfoManager.js';
 
 export class ImageGeneratorApp {
   constructor() {
+    this.uiManager = new UIManager();
     this.imageProcessor = new ImageProcessor();
     this.cropManager = new CropManager();
     this.fileUploader = new FileUploader();
-    this.uiManager = new UIManager();
     this.workManager = new WorkManager();
+    this.magnifierManager = new MagnifierManager(this.uiManager);
+    this.settingsManager = new SettingsManager(this.uiManager, this);
+    this.imageInfoManager = new ImageInfoManager(this.uiManager);
     this.autoSaveEnabled = false;
     this.processedBlob = null;
   }
@@ -20,20 +26,14 @@ export class ImageGeneratorApp {
   async init() {
     this.uiManager.initializeElements();
     this.bindEvents();
-    this.initMagnifier();
-    this.initFormatControls();
+    this.magnifierManager.initMagnifier();
+    this.settingsManager.initFormatControls();
 
     // 자동 저장된 작업물이 있는지 확인
     await this.checkAutoSave();
 
     // 초기 버튼 상태 설정
     this.updateButtonStates();
-
-    // 업로드 섹션 자동저장 버튼 초기 상태 설정 (제거됨 - HTML에 해당 요소가 없음)
-    // const elements = this.uiManager.getElements();
-    // elements.uploadAutoSaveBtn.textContent = this.autoSaveEnabled ? '🔄 자동저장 ON' : '🔄 자동저장';
-    // elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
-    // elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
   }
 
   // 이벤트 바인딩
@@ -81,286 +81,9 @@ export class ImageGeneratorApp {
     elements.downloadMultiBtn.addEventListener('click', () => this.downloadMultipleSizes());
   }
 
-  // 확장자별 컨트롤 초기화
-  initFormatControls() {
-    const elements = this.uiManager.getElements();
 
-    // 형식 선택 이벤트
-    elements.formatSelect.addEventListener('change', () => {
-      this.updateFormatControls();
-      this.autoSaveWork();
-    });
 
-    // 슬라이더 이벤트
-    elements.jpegQualitySlider.addEventListener('input', () => {
-      elements.jpegQualityValue.textContent = elements.jpegQualitySlider.value + '%';
-      this.autoSaveWork();
-    });
-
-    elements.pngCompressionSlider.addEventListener('input', () => {
-      elements.pngCompressionValue.textContent = elements.pngCompressionSlider.value;
-      this.autoSaveWork();
-    });
-
-    elements.webpQualitySlider.addEventListener('input', () => {
-      elements.webpQualityValue.textContent = elements.webpQualitySlider.value + '%';
-      this.autoSaveWork();
-    });
-
-    // WebP 투명도 이벤트
-    elements.webpTransparency.addEventListener('change', () => {
-      this.autoSaveWork();
-    });
-
-    // 최대 크기 입력 이벤트
-    elements.maxWidth.addEventListener('input', () => {
-      this.autoSaveWork();
-    });
-
-    elements.maxHeight.addEventListener('input', () => {
-      this.autoSaveWork();
-    });
-
-    // 사이즈 옵션 이벤트
-    if (elements.size1x) {
-      elements.size1x.addEventListener('change', () => {
-        this.autoSaveWork();
-      });
-    }
-    if (elements.size2x) {
-      elements.size2x.addEventListener('change', () => {
-        this.autoSaveWork();
-      });
-    }
-    if (elements.size3x) {
-      elements.size3x.addEventListener('change', () => {
-        this.autoSaveWork();
-      });
-    }
-
-    // 초기 상태 설정
-    this.updateFormatControls();
-  }
-
-  // 확장자별 컨트롤 업데이트
-  updateFormatControls() {
-    const elements = this.uiManager.getElements();
-    const format = elements.formatSelect.value;
-
-    // 모든 품질 그룹 숨기기
-    elements.jpegQualityGroup.style.display = 'none';
-    elements.pngCompressionGroup.style.display = 'none';
-    elements.webpQualityGroup.style.display = 'none';
-
-    // 선택된 형식에 따라 해당 그룹만 표시
-    switch (format) {
-      case 'jpeg':
-        elements.jpegQualityGroup.style.display = 'block';
-        break;
-      case 'png':
-        elements.pngCompressionGroup.style.display = 'block';
-        break;
-      case 'webp':
-        elements.webpQualityGroup.style.display = 'block';
-        break;
-      default:
-        // 원본 형식 유지 시 기본적으로 JPEG 품질 표시
-        elements.jpegQualityGroup.style.display = 'block';
-        break;
-    }
-  }
-
-  // 확대/축소 및 드래그 기능 초기화
-  initMagnifier() {
-    const elements = this.uiManager.getElements();
-
-    // 확대/축소 상태 관리
-    this.zoomState = {
-      scale: 1,
-      minScale: 0.5,
-      maxScale: 3,
-      step: 0.25
-    };
-
-    // 드래그 상태 관리
-    this.dragState = {
-      isDragging: false,
-      startX: 0,
-      startY: 0,
-      translateX: 0,
-      translateY: 0
-    };
-
-    // 확대/축소 버튼 이벤트
-    elements.zoomInBtn.addEventListener('click', () => this.zoomIn());
-    elements.zoomOutBtn.addEventListener('click', () => this.zoomOut());
-    elements.resetZoomBtn.addEventListener('click', () => this.resetZoom());
-
-    // 드래그 이벤트
-    this.initDragEvents();
-
-    // 크롭 이벤트 초기화
-    this.initCropEvents();
-
-    // 초기 상태 업데이트
-    this.updateZoomButtons();
-  }
-
-  // 확대
-  zoomIn() {
-    if (this.zoomState.scale < this.zoomState.maxScale) {
-      this.zoomState.scale = Math.min(this.zoomState.maxScale, this.zoomState.scale + this.zoomState.step);
-      this.applyZoom();
-    }
-  }
-
-  // 축소
-  zoomOut() {
-    if (this.zoomState.scale > this.zoomState.minScale) {
-      this.zoomState.scale = Math.max(this.zoomState.minScale, this.zoomState.scale - this.zoomState.step);
-      this.applyZoom();
-    }
-  }
-
-  // 확대/축소 리셋
-  resetZoom() {
-    this.zoomState.scale = 1;
-    this.dragState.translateX = 0;
-    this.dragState.translateY = 0;
-
-        // transition 복원 후 확대/축소 적용
-    const elements = this.uiManager.getElements();
-    const containers = [elements.originalImageContainer, elements.processedImageContainer];
-    const images = [elements.originalImage, elements.processedImage];
-
-    containers.forEach(container => {
-      container.classList.remove('dragging');
-      container.style.transition = '';
-    });
-
-    images.forEach(img => {
-      img.style.transition = '';
-    });
-
-    this.applyZoom();
-  }
-
-      // 확대/축소 적용
-  applyZoom() {
-    const elements = this.uiManager.getElements();
-    const transform = `scale(${this.zoomState.scale}) translate(${this.dragState.translateX}px, ${this.dragState.translateY}px)`;
-
-    // 이미지에 transform 적용
-    elements.originalImage.style.transform = transform;
-    elements.processedImage.style.transform = transform;
-
-    // 확대/축소 레벨 표시
-    elements.zoomLevel.textContent = `${Math.round(this.zoomState.scale * 100)}%`;
-
-    // 버튼 상태 업데이트
-    this.updateZoomButtons();
-
-    // preview-image-container에 zoomed 클래스 추가/제거
-    const containers = [elements.originalImageContainer, elements.processedImageContainer];
-    containers.forEach(container => {
-      if (this.zoomState.scale > 1) {
-        container.classList.add('zoomed');
-      } else {
-        container.classList.remove('zoomed');
-        container.classList.remove('dragging'); // 확대 해제 시 dragging 클래스도 제거
-      }
-    });
-  }
-
-  // 확대/축소 버튼 상태 업데이트
-  updateZoomButtons() {
-    const elements = this.uiManager.getElements();
-
-    elements.zoomInBtn.disabled = this.zoomState.scale >= this.zoomState.maxScale;
-    elements.zoomOutBtn.disabled = this.zoomState.scale <= this.zoomState.minScale;
-  }
-
-      // 드래그 이벤트 초기화
-  initDragEvents() {
-    const elements = this.uiManager.getElements();
-    const containers = [elements.originalImageContainer, elements.processedImageContainer];
-
-    containers.forEach(container => {
-      container.addEventListener('mousedown', (e) => this.startDrag(e));
-      container.addEventListener('mousemove', (e) => this.drag(e));
-      container.addEventListener('mouseup', () => this.endDrag());
-      container.addEventListener('mouseleave', () => this.endDrag());
-
-      // 터치 이벤트 지원
-      container.addEventListener('touchstart', (e) => this.startDrag(e));
-      container.addEventListener('touchmove', (e) => this.drag(e));
-      container.addEventListener('touchend', () => this.endDrag());
-    });
-  }
-
-      // 드래그 시작
-  startDrag(e) {
-    if (this.zoomState.scale <= 1) return;
-
-    e.preventDefault();
-    this.dragState.isDragging = true;
-
-        // 드래그 중일 때 transition 완전히 비활성화
-    const elements = this.uiManager.getElements();
-    const containers = [elements.originalImageContainer, elements.processedImageContainer];
-    const images = [elements.originalImage, elements.processedImage];
-
-    containers.forEach(container => {
-      container.classList.add('dragging');
-      container.style.transition = 'none';
-    });
-
-    images.forEach(img => {
-      img.style.transition = 'none';
-    });
-
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-
-    this.dragState.startX = clientX - this.dragState.translateX;
-    this.dragState.startY = clientY - this.dragState.translateY;
-  }
-
-  // 드래그 중
-  drag(e) {
-    if (!this.dragState.isDragging || this.zoomState.scale <= 1) return;
-
-    e.preventDefault();
-
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-
-    this.dragState.translateX = clientX - this.dragState.startX;
-    this.dragState.translateY = clientY - this.dragState.startY;
-
-    this.applyZoom();
-  }
-
-      // 드래그 종료
-  endDrag() {
-    this.dragState.isDragging = false;
-
-    // 드래그 종료 시 transition 다시 활성화
-    const elements = this.uiManager.getElements();
-    const containers = [elements.originalImageContainer, elements.processedImageContainer];
-    const images = [elements.originalImage, elements.processedImage];
-
-    containers.forEach(container => {
-      container.classList.remove('dragging');
-      container.style.transition = ''; // CSS 클래스의 transition으로 복원
-    });
-
-    images.forEach(img => {
-      img.style.transition = ''; // CSS 클래스의 transition으로 복원
-    });
-  }
-
-    // 크롭 이벤트 초기화
+  // 크롭 이벤트 초기화
   initCropEvents() {
     const elements = this.uiManager.getElements();
 
@@ -565,7 +288,7 @@ export class ImageGeneratorApp {
       this.uiManager.showPreview();
 
       // 원본 이미지 정보 업데이트
-      this.uiManager.updateOriginalImageInfo(file);
+      this.imageInfoManager.updateOriginalImageInfo(file);
 
       // 크롭 버튼 텍스트 업데이트
       this.updateCropButtonText();
@@ -603,7 +326,7 @@ export class ImageGeneratorApp {
       this.uiManager.setImageSource(elements.processedImage, url);
 
       // 처리된 이미지 정보 업데이트
-      this.uiManager.updateProcessedImageInfo(this.processedBlob, originalFile);
+      this.imageInfoManager.updateProcessedImageInfo(this.processedBlob, originalFile);
 
       // 사이즈 옵션 표시
       this.uiManager.showSizeOptions();
@@ -732,7 +455,7 @@ export class ImageGeneratorApp {
       this.uiManager.setImageSource(elements.processedImage, url);
 
       // 크롭된 이미지 정보 업데이트
-      this.uiManager.updateProcessedImageInfo(this.processedBlob, sourceFile);
+      this.imageInfoManager.updateProcessedImageInfo(this.processedBlob, sourceFile);
 
       // 크롭 모드 종료
       this.cancelCrop();
@@ -816,21 +539,7 @@ export class ImageGeneratorApp {
 
   // 현재 설정 가져오기
   getCurrentSettings() {
-    const elements = this.uiManager.getElements();
-    return {
-      format: elements.formatSelect.value,
-      jpegQuality: parseInt(elements.jpegQualitySlider.value),
-      pngCompression: parseInt(elements.pngCompressionSlider.value),
-      webpQuality: parseInt(elements.webpQualitySlider.value),
-      webpTransparency: elements.webpTransparency.checked,
-      maxWidth: elements.maxWidth.value,
-      maxHeight: elements.maxHeight.value,
-      sizeOptions: {
-        size1x: elements.size1x ? elements.size1x.checked : true,
-        size2x: elements.size2x ? elements.size2x.checked : false,
-        size3x: elements.size3x ? elements.size3x.checked : false
-      }
-    };
+    return this.settingsManager.getCurrentSettings();
   }
 
   // 자동 저장
@@ -1011,7 +720,7 @@ export class ImageGeneratorApp {
       this.fileUploader.setOriginalFile(work.originalImage);
 
       // 원본 이미지 정보 업데이트
-      this.updateOriginalImageInfo(work.originalImage);
+      this.imageInfoManager.updateOriginalImageInfo(work.originalImage);
 
       // 처리된 이미지 설정
       if (work.processedImage) {
@@ -1020,7 +729,7 @@ export class ImageGeneratorApp {
         this.processedBlob = work.processedImage;
 
         // 처리된 이미지 정보 업데이트
-        this.updateProcessedImageInfo(work.processedImage, work.originalImage);
+        this.imageInfoManager.updateProcessedImageInfo(work.processedImage, work.originalImage);
       } else {
         elements.processedImage.src = work.originalImage;
         this.processedBlob = null;
@@ -1030,7 +739,7 @@ export class ImageGeneratorApp {
       }
 
       // 설정 적용
-      this.applySettings(work.settings);
+      this.settingsManager.applySettings(work.settings);
 
       // 미리보기 섹션 표시
       this.uiManager.showPreview();
@@ -1045,124 +754,9 @@ export class ImageGeneratorApp {
     }
   }
 
-    // 원본 이미지 정보 업데이트 (Base64 이미지용)
-  updateOriginalImageInfo(base64Image) {
-    const elements = this.uiManager.getElements();
 
-    try {
-      // Base64에서 파일 크기 계산
-      const base64Data = base64Image.split(',')[1];
-      const fileSize = Math.ceil((base64Data.length * 3) / 4);
 
-      // 이미지 크기 계산
-      const img = new Image();
-      img.onload = () => {
-        elements.originalImageSize.textContent = `${img.width} × ${img.height}`;
-        elements.originalFileSize.textContent = this.uiManager.formatFileSize(fileSize);
 
-        // 형식 추출
-        const format = base64Image.split(';')[0].split('/')[1];
-        elements.originalFormat.textContent = format.toUpperCase();
-      };
-      img.src = base64Image;
-    } catch (error) {
-      console.error('이미지 정보 업데이트 실패:', error);
-      elements.originalImageSize.textContent = '-';
-      elements.originalFileSize.textContent = '-';
-      elements.originalFormat.textContent = '-';
-    }
-  }
-
-  // 처리된 이미지 정보 업데이트 (Base64 이미지용)
-  updateProcessedImageInfo(processedBase64, originalBase64) {
-    const elements = this.uiManager.getElements();
-
-    try {
-      // Base64에서 파일 크기 계산
-      const processedData = processedBase64.split(',')[1];
-      const originalData = originalBase64.split(',')[1];
-      const processedSize = Math.ceil((processedData.length * 3) / 4);
-      const originalSize = Math.ceil((originalData.length * 3) / 4);
-
-      // 이미지 크기 계산
-      const img = new Image();
-      img.onload = () => {
-        elements.processedImageSize.textContent = `${img.width} × ${img.height}`;
-        elements.processedFileSize.textContent = this.uiManager.formatFileSize(processedSize);
-
-        // 형식 추출
-        const format = processedBase64.split(';')[0].split('/')[1];
-        elements.processedFormat.textContent = format.toUpperCase();
-
-        // 압축 정보 표시
-        const compressionRatio = ((originalSize - processedSize) / originalSize * 100).toFixed(1);
-        elements.compressionRatio.textContent = `${compressionRatio}%`;
-        elements.compressionInfo.style.display = 'block';
-      };
-      img.src = processedBase64;
-    } catch (error) {
-      console.error('처리된 이미지 정보 업데이트 실패:', error);
-      elements.processedImageSize.textContent = '-';
-      elements.processedFileSize.textContent = '-';
-      elements.processedFormat.textContent = '-';
-      elements.compressionInfo.style.display = 'none';
-    }
-  }
-
-  // 설정 적용
-  applySettings(settings) {
-    const elements = this.uiManager.getElements();
-
-    // 형식 설정
-    if (settings.format) {
-      elements.formatSelect.value = settings.format;
-      this.updateFormatControls();
-    }
-
-    // JPEG 품질 설정
-    if (settings.jpegQuality) {
-      elements.jpegQualitySlider.value = settings.jpegQuality;
-      elements.jpegQualityValue.textContent = settings.jpegQuality + '%';
-    }
-
-    // PNG 압축 설정
-    if (settings.pngCompression !== undefined) {
-      elements.pngCompressionSlider.value = settings.pngCompression;
-      elements.pngCompressionValue.textContent = settings.pngCompression;
-    }
-
-    // WebP 품질 설정
-    if (settings.webpQuality) {
-      elements.webpQualitySlider.value = settings.webpQuality;
-      elements.webpQualityValue.textContent = settings.webpQuality + '%';
-    }
-
-    // WebP 투명도 설정
-    if (settings.webpTransparency !== undefined) {
-      elements.webpTransparency.checked = settings.webpTransparency;
-    }
-
-    // 최대 크기 설정
-    if (settings.maxWidth !== undefined) {
-      elements.maxWidth.value = settings.maxWidth;
-    }
-    if (settings.maxHeight !== undefined) {
-      elements.maxHeight.value = settings.maxHeight;
-    }
-
-    // 사이즈 옵션 설정
-    if (settings.sizeOptions) {
-      if (elements.size1x && settings.sizeOptions.size1x !== undefined) {
-        elements.size1x.checked = settings.sizeOptions.size1x;
-      }
-      if (elements.size2x && settings.sizeOptions.size2x !== undefined) {
-        elements.size2x.checked = settings.sizeOptions.size2x;
-      }
-      if (elements.size3x && settings.sizeOptions.size3x !== undefined) {
-        elements.size3x.checked = settings.sizeOptions.size3x;
-      }
-    }
-  }
 
   // 작업물 삭제
   async deleteWork(workId) {

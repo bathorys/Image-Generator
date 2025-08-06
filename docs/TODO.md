@@ -54,4 +54,5 @@
 - [x] 8px 기반 디자인 시스템
 - [x] 모던한 UI/UX
 - [x] 완전 클라이언트 사이드 처리
-- [x] **JavaScript 폴더 구조 정리**: `public/js`와 `src/js` 중복 제거, Astro 표준 구조로 정리 
+- [x] **JavaScript 폴더 구조 정리**: `public/js`와 `src/js` 중복 제거, Astro 표준 구조로 정리
+- [x] **app.js 모듈 분해**: 1,231줄 → 824줄로 33% 감소, 기능별 모듈 분리로 유지보수성 향상 

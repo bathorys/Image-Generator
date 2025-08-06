@@ -4,8 +4,8 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "build:gh-pages": "GITHUB_PAGES=true astro build",
+    "build": "cp -r src/js public/ && astro build",
+    "build:gh-pages": "cp -r src/js public/ && GITHUB_PAGES=true astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

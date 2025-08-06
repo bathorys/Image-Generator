@@ -26,10 +26,12 @@ import '@/styles/main.scss';
 					<input type="file" data-target="file-input" class="file-input" accept="image/*" />
 				</div>
 
-				<!-- 업로드 섹션 작업물 관리 버튼 -->
-				<div class="upload-work-actions">
-					<button class="btn btn-info" data-action="load-work" data-target="upload" title="저장된 작업물을 불러옵니다">📂 저장된 작업물 불러오기</button>
-					<button class="btn btn-warning" data-action="toggle-auto-save" data-target="upload" title="자동 저장을 토글합니다">🔄 자동저장</button>
+				<!-- 통합된 작업물 관리 영역 -->
+				<div class="work-actions" data-component="work-actions">
+					<button class="btn btn-info" data-action="save-work" title="현재 작업물을 저장합니다">💾 작업물 저장</button>
+					<button class="btn btn-info" data-action="load-work" title="저장된 작업물 목록을 불러옵니다">📂 작업물 불러오기</button>
+					<button class="btn btn-warning" data-action="toggle-auto-save" title="자동 저장을 토글합니다">🔄 자동저장</button>
+					<button class="btn btn-danger" data-action="clear-works" title="모든 저장된 작업물을 삭제합니다">🗑️ 작업물 삭제</button>
 				</div>
 
 				<div class="preview-section" data-component="preview-section">
@@ -144,12 +146,7 @@ import '@/styles/main.scss';
 							<button class="btn btn-secondary" data-action="reset-all" title="모든 설정을 초기화하고 처음부터 다시 시작합니다">새로 시작</button>
 						</div>
 
-						<div class="work-actions" data-component="work-actions">
-							<button class="btn btn-info" data-action="save-work" title="현재 작업물을 저장합니다">작업물 저장</button>
-							<button class="btn btn-info" data-action="load-work" title="저장된 작업물 목록을 불러옵니다">작업물 불러오기</button>
-							<button class="btn btn-warning" data-action="toggle-auto-save" title="자동 저장을 토글합니다">자동저장</button>
-							<button class="btn btn-danger" data-action="clear-works" title="모든 저장된 작업물을 삭제합니다">작업물 삭제</button>
-						</div>
+
 
 						<!-- 사이즈 별 저장 옵션 -->
 						<div class="size-options" data-component="size-options" style="display: none;">

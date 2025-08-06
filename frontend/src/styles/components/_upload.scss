@@ -90,31 +90,31 @@
   display: none;
 }
 
-// 업로드 작업물 액션 버튼 개선
-.upload-work-actions {
+// 통합된 작업물 관리 영역 스타일
+.work-actions {
   display: flex;
   gap: $spacing-sm;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   margin: $spacing-md 0 $spacing-lg 0;
-  padding: $spacing-sm;
+  padding: $spacing-md;
   background: linear-gradient(135deg, rgba($primary-color, 0.05) 0%, rgba($secondary-color, 0.05) 100%);
-  border-radius: $border-radius-md;
+  border-radius: $border-radius-lg;
   border: 1px solid rgba($primary-color, 0.2);
   box-shadow: $shadow-sm;
 
   .btn {
     font-size: $font-size-sm;
-    padding: $spacing-xs $spacing-sm;
-    min-width: 140px;
-    max-width: 180px;
+    padding: $spacing-sm $spacing-md;
+    min-width: 120px;
     border-radius: $border-radius-md;
     font-weight: 600;
     transition: all $transition-base;
     position: relative;
     overflow: hidden;
     flex: 1;
+    max-width: 160px;
 
     &::before {
       content: '';
@@ -148,6 +148,16 @@
       &:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba($warning-color, 0.4);
+      }
+    }
+
+    &.btn-danger {
+      background: linear-gradient(135deg, $danger-color 0%, darken($danger-color, 10%) 100%);
+      box-shadow: 0 2px 8px rgba($danger-color, 0.3);
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($danger-color, 0.4);
       }
     }
   }

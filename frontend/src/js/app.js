@@ -43,10 +43,16 @@ export class ImageGeneratorApp {
 
     // 크롭 상호작용 이벤트
     elements.cropOverlay.addEventListener('mousedown', (e) => this.cropManager.startCropDrag(e, elements.cropOverlay));
-    elements.cropHandleNW.addEventListener('mousedown', (e) => this.cropManager.startCropResize(e, 'nw'));
-    elements.cropHandleNE.addEventListener('mousedown', (e) => this.cropManager.startCropResize(e, 'ne'));
-    elements.cropHandleSW.addEventListener('mousedown', (e) => this.cropManager.startCropResize(e, 'sw'));
-    elements.cropHandleSE.addEventListener('mousedown', (e) => this.cropManager.startCropResize(e, 'se'));
+
+    // 모든 크롭 핸들에 이벤트 리스너 추가
+    const cropHandles = ['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se'];
+    cropHandles.forEach(position => {
+      const handle = elements[`cropHandle${position.toUpperCase()}`];
+      if (handle) {
+        handle.addEventListener('mousedown', (e) => this.cropManager.startCropResize(e, position));
+      }
+    });
+
     document.addEventListener('mousemove', (e) => this.handleCropMouseMove(e));
     document.addEventListener('mouseup', () => this.cropManager.stopCropInteraction());
   }

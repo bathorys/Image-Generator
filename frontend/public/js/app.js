@@ -416,7 +416,7 @@ export class ImageGeneratorApp {
       if (handle) {
         handle.addEventListener('mousedown', (e) => {
           if (this.cropManager.isCropMode) {
-            const handleType = handle.id.replace('cropHandle', '').toLowerCase();
+            const handleType = handle.getAttribute('data-position');
             this.cropManager.startCropResize(e, handleType);
             // 전역 마우스 이벤트 추가
             document.addEventListener('mousemove', this.globalCropMouseMove);

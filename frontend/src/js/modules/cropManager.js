@@ -106,6 +106,20 @@ export class CropManager {
           this.cropData.x = Math.max(0, this.cropData.x + deltaX);
           this.cropData.y = Math.max(0, this.cropData.y + deltaY);
           break;
+        case 'n':
+          this.cropData.height = Math.max(minSize, this.cropData.height - deltaY);
+          this.cropData.y = Math.max(0, this.cropData.y + deltaY);
+          break;
+        case 's':
+          this.cropData.height = Math.max(minSize, this.cropData.height + deltaY);
+          break;
+        case 'w':
+          this.cropData.width = Math.max(minSize, this.cropData.width - deltaX);
+          this.cropData.x = Math.max(0, this.cropData.x + deltaX);
+          break;
+        case 'e':
+          this.cropData.width = Math.max(minSize, this.cropData.width + deltaX);
+          break;
       }
 
       // 경계 체크

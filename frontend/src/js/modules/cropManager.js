@@ -275,20 +275,26 @@ export class CropManager {
     const originalFile = app.fileUploader.getOriginalFile();
 
     // 크롭 버튼 텍스트 및 상태 업데이트
-    if (!originalFile) {
-      elements.cropBtn.textContent = '크롭 모드';
-      elements.cropBtn.disabled = true;
-    } else if (app.processedBlob) {
-      elements.cropBtn.textContent = '처리된 이미지 크롭';
-      elements.cropBtn.disabled = false;
-    } else {
-      elements.cropBtn.textContent = '원본 이미지 크롭';
-      elements.cropBtn.disabled = false;
+    if (elements.cropBtn) {
+      if (!originalFile) {
+        elements.cropBtn.textContent = '크롭 모드';
+        elements.cropBtn.disabled = true;
+      } else if (app.processedBlob) {
+        elements.cropBtn.textContent = '처리된 이미지 크롭';
+        elements.cropBtn.disabled = false;
+      } else {
+        elements.cropBtn.textContent = '원본 이미지 크롭';
+        elements.cropBtn.disabled = false;
+      }
     }
 
     // 다른 버튼들 상태 업데이트
-    elements.processBtn.disabled = !originalFile;
-    elements.resetImageBtn.disabled = !originalFile;
+    if (elements.processBtn) {
+      elements.processBtn.disabled = !originalFile;
+    }
+    if (elements.resetImageBtn) {
+      elements.resetImageBtn.disabled = !originalFile;
+    }
   }
 
   // 크롭 input 값 변경 처리
@@ -343,8 +349,20 @@ export class CropManager {
       const url = URL.createObjectURL(app.processedBlob);
       app.uiManager.setImageSource(elements.processedImage, url);
 
-      // 크롭된 이미지 정보 업데이트
-      app.imageInfoManager.updateProcessedImageInfo(app.processedBlob, sourceFile);
+      // 크롭된 이미지 정보 업데이트 (Blob을 Base64로 변환)
+      const reader = new FileReader();
+      reader.onload = () => {
+        const processedBase64 = reader.result;
+        // 원본 파일도 Base64로 변환
+        const originalReader = new FileReader();
+        originalReader.onload = () => {
+          const originalBase64 = originalReader.result;
+          // 처리된 이미지 정보 업데이트
+          app.imageInfoManager.updateProcessedImageInfo(processedBase64, originalBase64);
+        };
+        originalReader.readAsDataURL(sourceFile);
+      };
+      reader.readAsDataURL(app.processedBlob);
 
       // 크롭 모드 종료
       this.cancelCropMode(app);

@@ -287,8 +287,20 @@ export class ImageGeneratorApp {
       const url = URL.createObjectURL(this.processedBlob);
       this.uiManager.setImageSource(elements.processedImage, url);
 
-      // 처리된 이미지 정보 업데이트
-      this.imageInfoManager.updateProcessedImageInfo(this.processedBlob, originalFile);
+      // Blob을 Base64로 변환
+      const reader = new FileReader();
+      reader.onload = () => {
+        const processedBase64 = reader.result;
+        // 원본 파일도 Base64로 변환
+        const originalReader = new FileReader();
+        originalReader.onload = () => {
+          const originalBase64 = originalReader.result;
+          // 처리된 이미지 정보 업데이트
+          this.imageInfoManager.updateProcessedImageInfo(processedBase64, originalBase64);
+        };
+        originalReader.readAsDataURL(originalFile);
+      };
+      reader.readAsDataURL(this.processedBlob);
 
       // 사이즈 옵션 표시
       this.uiManager.showSizeOptions();

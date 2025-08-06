@@ -125,34 +125,173 @@ npm run build
 3. **에러 처리**: 적절한 에러 핸들링
 4. **성능 최적화**: 불필요한 DOM 조작 최소화
 
-## 브라우저 지원
+## 🎨 스타일 작업 가이드라인
 
-### 최소 지원 브라우저
-- **Chrome**: 87+ (2020년 11월 이후)
-- **Edge**: 87+ (2020년 11월 이후)
-- **Firefox**: 103+ (2022년 7월 이후)
-- **Safari**: 16+ (2022년 9월 이후)
+### 스타일 수정 제한 정책
+**현재 스타일 시스템이 완성되었으므로 추가적인 스타일 수정은 제한합니다.**
 
-## 성능 최적화
+#### ✅ 허용되는 작업
+- **새로운 컴포넌트 추가**: 완전히 새로운 기능을 위한 스타일
+- **유틸리티 클래스 추가**: 기능적인 유틸리티 클래스 (예: `.hidden`, `.loading`)
+- **상태별 클래스 추가**: JavaScript로 제어되는 상태 클래스 (예: `.is-active`, `.has-error`)
 
-### 이미지 처리
-- Canvas API 활용
-- Web Workers 고려 (향후 개선)
-- 메모리 누수 방지
+#### ❌ 제한되는 작업
+- **기존 스타일 수정**: 현재 구현된 컴포넌트의 스타일 변경
+- **간격 시스템 변경**: 8px 기반 간격 시스템 수정
+- **색상 시스템 변경**: 정의된 색상 변수 수정
+- **레이아웃 구조 변경**: 기존 레이아웃의 구조적 변경
 
-### CSS 최적화
-- Critical CSS 분리
-- 불필요한 스타일 제거
-- 애니메이션 최적화
+### 엘리먼트 클래스 추가 가이드라인
+새로운 기능 개발 시 필요한 클래스는 추가할 수 있습니다:
 
-## 배포
+```html
+<!-- ✅ 좋은 예: 기능적인 클래스 추가 -->
+<div class="upload-section" id="uploadSection">
+  <div class="upload-icon">📁</div>
+  <div class="upload-text">이미지를 선택하거나 드래그하여 업로드하세요</div>
+  <div class="upload-hint">JPG, PNG, GIF 파일을 지원합니다</div>
+  <input type="file" id="fileInput" class="file-input" accept="image/*" />
+  
+  <!-- 새로운 기능을 위한 클래스 추가 -->
+  <div class="upload-progress" id="uploadProgress" style="display: none;">
+    <div class="progress-bar"></div>
+  </div>
+</div>
+```
 
-### 정적 사이트 배포
-- Astro의 정적 사이트 생성 기능 활용
-- CDN을 통한 빠른 로딩
-- HTTPS 필수
+## 🔧 스크립트 셀렉팅 방식 개선
 
-### 환경별 설정
-- 개발: `npm run dev`
-- 스테이징: `npm run build && npm run preview`
-- 프로덕션: `npm run build` 
+### 현재 문제점
+- `getElementById()` 사용으로 인한 강한 결합
+- HTML 구조 변경 시 JavaScript 수정 필요
+- 재사용성과 유지보수성 저하
+
+### 개선된 셀렉팅 방식
+
+#### 1. Data Attributes 사용 (권장)
+```html
+<!-- HTML -->
+<button data-action="process-image" data-target="image-processor">
+  이미지 처리
+</button>
+<div data-component="image-preview" data-id="original">
+  <!-- 내용 -->
+</div>
+```
+
+```javascript
+// JavaScript
+const processBtn = document.querySelector('[data-action="process-image"]');
+const imagePreview = document.querySelector('[data-component="image-preview"][data-id="original"]');
+
+// 이벤트 리스너
+processBtn.addEventListener('click', () => {
+  // 처리 로직
+});
+```
+
+#### 2. CSS 클래스 기반 셀렉팅
+```html
+<!-- HTML -->
+<button class="btn btn-primary js-process-image">
+  이미지 처리
+</button>
+<div class="image-preview js-original-preview">
+  <!-- 내용 -->
+</div>
+```
+
+```javascript
+// JavaScript
+const processBtn = document.querySelector('.js-process-image');
+const originalPreview = document.querySelector('.js-original-preview');
+
+// 이벤트 리스너
+processBtn.addEventListener('click', () => {
+  // 처리 로직
+});
+```
+
+#### 3. 컴포넌트 기반 셀렉팅
+```html
+<!-- HTML -->
+<div class="image-processor" data-component="image-processor">
+  <button class="btn btn-primary" data-action="process">
+    이미지 처리
+  </button>
+  <div class="preview-container" data-target="preview">
+    <!-- 내용 -->
+  </div>
+</div>
+```
+
+```javascript
+// JavaScript
+class ImageProcessor {
+  constructor(container) {
+    this.container = container;
+    this.processBtn = container.querySelector('[data-action="process"]');
+    this.preview = container.querySelector('[data-target="preview"]');
+    
+    this.init();
+  }
+  
+  init() {
+    this.processBtn.addEventListener('click', () => {
+      this.processImage();
+    });
+  }
+  
+  processImage() {
+    // 처리 로직
+  }
+}
+
+// 사용
+const processor = new ImageProcessor(document.querySelector('[data-component="image-processor"]'));
+```
+
+### 셀렉팅 우선순위
+1. **Data Attributes** (가장 권장)
+   - 명확한 의미 전달
+   - HTML과 JavaScript 분리
+   - 재사용성 높음
+
+2. **CSS 클래스 (js- 접두사)**
+   - 기존 CSS 클래스와 구분
+   - JavaScript 전용 클래스임을 명시
+
+3. **컴포넌트 기반**
+   - 복잡한 컴포넌트에 적합
+   - 캡슐화된 구조
+
+### 마이그레이션 가이드
+
+#### 단계별 마이그레이션
+1. **새로운 기능**: Data Attributes 방식 사용
+2. **기존 기능 수정**: 점진적으로 Data Attributes로 변경
+3. **완전한 마이그레이션**: 모든 셀렉팅을 Data Attributes로 통일
+
+#### 예시: 기존 코드 개선
+```javascript
+// ❌ 기존 방식
+const processBtn = document.getElementById('processBtn');
+const originalImage = document.getElementById('originalImage');
+
+// ✅ 개선된 방식
+const processBtn = document.querySelector('[data-action="process-image"]');
+const originalImage = document.querySelector('[data-component="image-preview"][data-id="original"] img');
+```
+
+### 명명 규칙
+
+#### Data Attributes 규칙
+- `data-action`: 사용자 액션 (예: `process-image`, `crop-image`, `download`)
+- `data-component`: 컴포넌트 식별 (예: `image-preview`, `upload-section`)
+- `data-target`: 대상 요소 (예: `preview`, `controls`, `modal`)
+- `data-id`: 고유 식별자 (예: `original`, `processed`, `crop`)
+
+#### CSS 클래스 규칙 (JavaScript 전용)
+- `js-` 접두사 사용
+- 케밥 케이스 (kebab-case)
+- 기능 중심 명명 (예: `js-process-image`, `js-show-modal`) 

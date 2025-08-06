@@ -1,123 +1,204 @@
-// UI 관리 모듈
+// UI 관리 모듈 - Data Attributes 기반 셀렉팅
+import DOMSelector from '../utils/domSelector.js';
+
 export class UIManager {
   constructor() {
     this.elements = {};
+    this.initializeElements();
   }
 
-  // DOM 요소 초기화
+  // DOM 요소 초기화 - Data Attributes 기반
   initializeElements() {
     this.elements = {
-      uploadSection: document.getElementById('uploadSection'),
-      fileInput: document.getElementById('fileInput'),
-      previewSection: document.getElementById('previewSection'),
-      originalImage: document.getElementById('originalImage'),
-      processedImage: document.getElementById('processedImage'),
-      formatSelect: document.getElementById('formatSelect'),
+      // 업로드 섹션
+      uploadSection: DOMSelector.component('upload-section'),
+      fileInput: DOMSelector.target('file-input'),
 
-      // JPEG 품질 설정
-      jpegQualityGroup: document.getElementById('jpegQualityGroup'),
-      jpegQualitySlider: document.getElementById('jpegQualitySlider'),
-      jpegQualityValue: document.getElementById('jpegQualityValue'),
+      // 프리뷰 섹션
+      previewSection: DOMSelector.component('preview-section'),
+      originalImage: DOMSelector.target('original-image'),
+      processedImage: DOMSelector.target('processed-image'),
+      originalInfo: DOMSelector.target('original-info'),
+      processedInfo: DOMSelector.target('processed-info'),
+      originalFileSize: DOMSelector.target('original-file-size'),
+      originalImageSize: DOMSelector.target('original-image-size'),
+      originalFormat: DOMSelector.target('original-format'),
+      processedFileSize: DOMSelector.target('processed-file-size'),
+      processedImageSize: DOMSelector.target('processed-image-size'),
+      processedFormat: DOMSelector.target('processed-format'),
+      compressionInfo: DOMSelector.target('compression-info'),
+      compressionRatio: DOMSelector.target('compression-ratio'),
 
-      // PNG 압축 설정
-      pngCompressionGroup: document.getElementById('pngCompressionGroup'),
-      pngCompressionSlider: document.getElementById('pngCompressionSlider'),
-      pngCompressionValue: document.getElementById('pngCompressionValue'),
+      // 컨트롤 섹션
+      controlsSection: DOMSelector.component('controls-section'),
+      formatSelect: DOMSelector.target('format-select'),
+      jpegQualityGroup: DOMSelector.componentByType('control-group', 'jpeg-quality'),
+      jpegQualitySlider: DOMSelector.target('jpeg-quality-slider'),
+      jpegQualityValue: DOMSelector.target('jpeg-quality-value'),
+      pngCompressionGroup: DOMSelector.componentByType('control-group', 'png-compression'),
+      pngCompressionSlider: DOMSelector.target('png-compression-slider'),
+      pngCompressionValue: DOMSelector.target('png-compression-value'),
+      webpQualityGroup: DOMSelector.componentByType('control-group', 'webp-quality'),
+      webpQualitySlider: DOMSelector.target('webp-quality-slider'),
+      webpQualityValue: DOMSelector.target('webp-quality-value'),
+      webpTransparency: DOMSelector.target('webp-transparency'),
+      maxWidth: DOMSelector.target('max-width'),
+      maxHeight: DOMSelector.target('max-height'),
 
-      // WebP 품질 설정
-      webpQualityGroup: document.getElementById('webpQualityGroup'),
-      webpQualitySlider: document.getElementById('webpQualitySlider'),
-      webpQualityValue: document.getElementById('webpQualityValue'),
-      webpTransparency: document.getElementById('webpTransparency'),
+      // 액션 버튼들
+      processBtn: DOMSelector.action('process-image'),
+      cropBtn: DOMSelector.action('crop-mode'),
+      downloadBtn: DOMSelector.action('download-image'),
+      resetImageBtn: DOMSelector.action('reset-image'),
+      resetBtn: DOMSelector.action('reset-all'),
 
-      // 이미지 정보 표시
-      originalFileSize: document.getElementById('originalFileSize'),
-      originalImageSize: document.getElementById('originalImageSize'),
-      originalFormat: document.getElementById('originalFormat'),
-      processedFileSize: document.getElementById('processedFileSize'),
-      processedImageSize: document.getElementById('processedImageSize'),
-      processedFormat: document.getElementById('processedFormat'),
-      compressionInfo: document.getElementById('compressionInfo'),
-      compressionRatio: document.getElementById('compressionRatio'),
+      // 작업물 관리 버튼들
+      saveWorkBtn: DOMSelector.action('save-work'),
+      loadWorkBtn: DOMSelector.action('load-work'),
+      autoSaveBtn: DOMSelector.action('toggle-auto-save'),
+      clearWorksBtn: DOMSelector.action('clear-works'),
+      uploadLoadWorkBtn: DOMSelector.actionByTarget('load-work', 'upload'),
+      uploadAutoSaveBtn: DOMSelector.actionByTarget('toggle-auto-save', 'upload'),
 
-      // 사이즈 별 저장 옵션
-      sizeOptions: document.getElementById('sizeOptions'),
-      size1x: document.getElementById('size1x'),
-      size2x: document.getElementById('size2x'),
-      size3x: document.getElementById('size3x'),
-      downloadMultiBtn: document.getElementById('downloadMultiBtn'),
+      // 크롭 섹션
+      cropSection: DOMSelector.component('crop-section'),
+      cropImage: DOMSelector.target('crop-image'),
+      cropOverlay: DOMSelector.target('crop-overlay'),
+      applyCropBtn: DOMSelector.action('apply-crop'),
+      cancelCropBtn: DOMSelector.action('cancel-crop'),
 
-      maxWidth: document.getElementById('maxWidth'),
-      maxHeight: document.getElementById('maxHeight'),
-      processBtn: document.getElementById('processBtn'),
-      cropBtn: document.getElementById('cropBtn'),
-      downloadBtn: document.getElementById('downloadBtn'),
-      resetImageBtn: document.getElementById('resetImageBtn'),
-      resetBtn: document.getElementById('resetBtn'),
-      saveWorkBtn: document.getElementById('saveWorkBtn'),
-      loadWorkBtn: document.getElementById('loadWorkBtn'),
-      autoSaveBtn: document.getElementById('autoSaveBtn'),
-      clearWorksBtn: document.getElementById('clearWorksBtn'),
-      uploadLoadWorkBtn: document.getElementById('uploadLoadWorkBtn'),
-      uploadAutoSaveBtn: document.getElementById('uploadAutoSaveBtn'),
-      cropSection: document.getElementById('cropSection'),
-      cropImage: document.getElementById('cropImage'),
-      cropOverlay: document.getElementById('cropOverlay'),
-      cropHandleNW: document.getElementById('cropHandleNW'),
-      cropHandleN: document.getElementById('cropHandleN'),
-      cropHandleNE: document.getElementById('cropHandleNE'),
-      cropHandleW: document.getElementById('cropHandleW'),
-      cropHandleE: document.getElementById('cropHandleE'),
-      cropHandleSW: document.getElementById('cropHandleSW'),
-      cropHandleS: document.getElementById('cropHandleS'),
-      cropHandleSE: document.getElementById('cropHandleSE'),
-      applyCropBtn: document.getElementById('applyCropBtn'),
-      cancelCropBtn: document.getElementById('cancelCropBtn'),
-      // 확대/축소 관련 요소들
-      zoomOutBtn: document.getElementById('zoomOutBtn'),
-      zoomInBtn: document.getElementById('zoomInBtn'),
-      resetZoomBtn: document.getElementById('resetZoomBtn'),
-      zoomLevel: document.getElementById('zoomLevel'),
-      originalImageContainer: document.getElementById('originalImage').parentElement,
-      processedImageContainer: document.getElementById('processedImage').parentElement,
+      // 크롭 핸들들
+      cropHandleNW: DOMSelector.cropHandle('nw'),
+      cropHandleN: DOMSelector.cropHandle('n'),
+      cropHandleNE: DOMSelector.cropHandle('ne'),
+      cropHandleW: DOMSelector.cropHandle('w'),
+      cropHandleE: DOMSelector.cropHandle('e'),
+      cropHandleSW: DOMSelector.cropHandle('sw'),
+      cropHandleS: DOMSelector.cropHandle('s'),
+      cropHandleSE: DOMSelector.cropHandle('se'),
 
-      // 작업물 모달 관련 요소들
-      workModal: document.getElementById('workModal'),
-      workList: document.getElementById('workList'),
-      workEmpty: document.getElementById('workEmpty'),
-      closeWorkModal: document.getElementById('closeWorkModal'),
-      workSaveModal: document.getElementById('workSaveModal'),
-      workNameInput: document.getElementById('workNameInput'),
-      saveOriginalPreview: document.getElementById('saveOriginalPreview'),
-      saveProcessedPreview: document.getElementById('saveProcessedPreview'),
-      saveSettingsPreview: document.getElementById('saveSettingsPreview'),
-      confirmSaveWorkBtn: document.getElementById('confirmSaveWorkBtn'),
-      cancelSaveWorkBtn: document.getElementById('cancelSaveWorkBtn'),
-      closeWorkSaveModal: document.getElementById('closeWorkSaveModal')
+      // 확대/축소 컨트롤
+      zoomControls: DOMSelector.component('zoom-controls'),
+      zoomOutBtn: DOMSelector.action('zoom-out'),
+      zoomInBtn: DOMSelector.action('zoom-in'),
+      resetZoomBtn: DOMSelector.action('reset-zoom'),
+      zoomLevel: DOMSelector.target('zoom-level'),
+
+      // 사이즈 옵션
+      sizeOptions: DOMSelector.component('size-options'),
+      size1x: DOMSelector.sizeOption('1x'),
+      size2x: DOMSelector.sizeOption('2x'),
+      size3x: DOMSelector.sizeOption('3x'),
+      downloadMultiBtn: DOMSelector.action('download-multi'),
+
+      // 모달들
+      workModal: DOMSelector.modal('work-modal'),
+      workList: DOMSelector.target('work-list'),
+      workEmpty: DOMSelector.target('work-empty'),
+      closeWorkModal: DOMSelector.modalCloseButton('work-modal'),
+      workSaveModal: DOMSelector.modal('work-save-modal'),
+      workNameInput: DOMSelector.target('work-name-input'),
+      saveOriginalPreview: DOMSelector.target('save-original-preview'),
+      saveProcessedPreview: DOMSelector.target('save-processed-preview'),
+      saveSettingsPreview: DOMSelector.target('save-settings-preview'),
+      confirmSaveWorkBtn: DOMSelector.action('confirm-save-work'),
+      cancelSaveWorkBtn: DOMSelector.action('cancel-save-work'),
+      closeWorkSaveModal: DOMSelector.modalCloseButton('work-save-modal'),
+
+      // 이미지 컨테이너들 (부모 요소)
+      originalImageContainer: DOMSelector.target('original').querySelector('.preview-image-container'),
+      processedImageContainer: DOMSelector.target('processed').querySelector('.preview-image-container')
     };
   }
 
   // 품질 값 업데이트
   updateQualityValue() {
-    this.elements.qualityValue.textContent = this.elements.qualitySlider.value + '%';
+    if (this.elements.jpegQualityValue && this.elements.jpegQualitySlider) {
+      this.elements.jpegQualityValue.textContent = this.elements.jpegQualitySlider.value + '%';
+    }
   }
 
   // 미리보기 표시
   showPreview() {
-    this.elements.previewSection.style.display = 'block';
-    this.elements.uploadSection.style.display = 'none';
+    if (this.elements.previewSection) {
+      this.elements.previewSection.style.display = 'block';
+    }
+    if (this.elements.uploadSection) {
+      this.elements.uploadSection.style.display = 'none';
+    }
   }
 
   // 크롭 섹션 표시/숨김
   toggleCropSection(show) {
-    this.elements.cropSection.style.display = show ? 'block' : 'none';
+    if (this.elements.cropSection) {
+      this.elements.cropSection.style.display = show ? 'block' : 'none';
+    }
+  }
+
+
+
+  // 이미지 소스 설정
+  setImageSource(imageElement, source) {
+    if (imageElement) {
+      imageElement.src = source;
+    }
+  }
+
+  // 다운로드 링크 생성
+  createDownloadLink(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // 알림 표시
+  showAlert(message) {
+    alert(message);
+  }
+
+  // 성공 메시지 표시
+  showSuccessMessage(originalSize, newSize) {
+    this.showAlert(`크롭 완료!\n원본: ${originalSize}\n크롭된 이미지: ${newSize}`);
+  }
+
+  // DOM 요소 가져오기
+  getElement(name) {
+    return this.elements[name];
+  }
+
+  // 모든 DOM 요소 가져오기
+  getElements() {
+    return this.elements;
+  }
+
+  // 안전한 요소 접근
+  safeGetElement(name) {
+    const element = this.elements[name];
+    if (!element) {
+      console.warn(`Element not found: ${name}`);
+    }
+    return element;
+  }
+
+  // 요소 존재 여부 확인
+  hasElement(name) {
+    return !!this.elements[name];
   }
 
   // 이미지만 초기화 (설정은 유지)
   resetImage() {
     // 원본 이미지는 유지하고, 처리된 이미지만 초기화
-    this.elements.processedImage.src = '';
-    this.elements.cropSection.style.display = 'none';
+    if (this.elements.processedImage) {
+      this.elements.processedImage.src = '';
+    }
+    if (this.elements.cropSection) {
+      this.elements.cropSection.style.display = 'none';
+    }
 
     // 처리된 이미지 정보만 초기화
     this.resetProcessedImageInfo();
@@ -128,12 +209,24 @@ export class UIManager {
 
   // 앱 리셋 (모든 설정 포함)
   resetApp() {
-    this.elements.previewSection.style.display = 'none';
-    this.elements.cropSection.style.display = 'none';
-    this.elements.uploadSection.style.display = 'block';
-    this.elements.fileInput.value = '';
-    this.elements.originalImage.src = '';
-    this.elements.processedImage.src = '';
+    if (this.elements.previewSection) {
+      this.elements.previewSection.style.display = 'none';
+    }
+    if (this.elements.cropSection) {
+      this.elements.cropSection.style.display = 'none';
+    }
+    if (this.elements.uploadSection) {
+      this.elements.uploadSection.style.display = 'block';
+    }
+    if (this.elements.fileInput) {
+      this.elements.fileInput.value = '';
+    }
+    if (this.elements.originalImage) {
+      this.elements.originalImage.src = '';
+    }
+    if (this.elements.processedImage) {
+      this.elements.processedImage.src = '';
+    }
 
     // 이미지 정보 초기화
     this.resetImageInfo();
@@ -187,40 +280,72 @@ export class UIManager {
 
   // 이미지 정보 초기화
   resetImageInfo() {
-    this.elements.originalFileSize.textContent = '-';
-    this.elements.originalImageSize.textContent = '-';
-    this.elements.originalFormat.textContent = '-';
-    this.elements.processedFileSize.textContent = '-';
-    this.elements.processedImageSize.textContent = '-';
-    this.elements.processedFormat.textContent = '-';
-    this.elements.compressionInfo.style.display = 'none';
+    if (this.elements.originalFileSize) {
+      this.elements.originalFileSize.textContent = '-';
+    }
+    if (this.elements.originalImageSize) {
+      this.elements.originalImageSize.textContent = '-';
+    }
+    if (this.elements.originalFormat) {
+      this.elements.originalFormat.textContent = '-';
+    }
+    if (this.elements.processedFileSize) {
+      this.elements.processedFileSize.textContent = '-';
+    }
+    if (this.elements.processedImageSize) {
+      this.elements.processedImageSize.textContent = '-';
+    }
+    if (this.elements.processedFormat) {
+      this.elements.processedFormat.textContent = '-';
+    }
+    if (this.elements.compressionInfo) {
+      this.elements.compressionInfo.style.display = 'none';
+    }
   }
 
   // 처리된 이미지 정보만 초기화
   resetProcessedImageInfo() {
-    this.elements.processedFileSize.textContent = '-';
-    this.elements.processedImageSize.textContent = '-';
-    this.elements.processedFormat.textContent = '-';
-    this.elements.compressionInfo.style.display = 'none';
+    if (this.elements.processedFileSize) {
+      this.elements.processedFileSize.textContent = '-';
+    }
+    if (this.elements.processedImageSize) {
+      this.elements.processedImageSize.textContent = '-';
+    }
+    if (this.elements.processedFormat) {
+      this.elements.processedFormat.textContent = '-';
+    }
+    if (this.elements.compressionInfo) {
+      this.elements.compressionInfo.style.display = 'none';
+    }
   }
 
   // 원본 이미지 정보 업데이트
   updateOriginalImageInfo(file) {
-    this.elements.originalFileSize.textContent = this.formatFileSize(file.size);
-    this.elements.originalFormat.textContent = file.type.split('/')[1].toUpperCase();
+    if (this.elements.originalFileSize) {
+      this.elements.originalFileSize.textContent = this.formatFileSize(file.size);
+    }
+    if (this.elements.originalFormat) {
+      this.elements.originalFormat.textContent = file.type.split('/')[1].toUpperCase();
+    }
 
     // 이미지 크기는 이미지 로드 후 업데이트
     const img = new Image();
     img.onload = () => {
-      this.elements.originalImageSize.textContent = `${img.naturalWidth} × ${img.naturalHeight}`;
+      if (this.elements.originalImageSize) {
+        this.elements.originalImageSize.textContent = `${img.naturalWidth} × ${img.naturalHeight}`;
+      }
     };
     img.src = URL.createObjectURL(file);
   }
 
   // 처리된 이미지 정보 업데이트
   updateProcessedImageInfo(blob, originalFile) {
-    this.elements.processedFileSize.textContent = this.formatFileSize(blob.size);
-    this.elements.processedFormat.textContent = blob.type.split('/')[1].toUpperCase();
+    if (this.elements.processedFileSize) {
+      this.elements.processedFileSize.textContent = this.formatFileSize(blob.size);
+    }
+    if (this.elements.processedFormat) {
+      this.elements.processedFormat.textContent = blob.type.split('/')[1].toUpperCase();
+    }
 
     // 압축률 계산 및 표시
     const compressionRatio = ((1 - blob.size / originalFile.size) * 100).toFixed(1);
@@ -228,20 +353,30 @@ export class UIManager {
     // PNG의 경우 압축률이 음수일 수 있음 (이미지 크기 조정으로 인해)
     if (blob.type === 'image/png') {
       if (compressionRatio > 0) {
-        this.elements.compressionRatio.textContent = `압축률: ${compressionRatio}%`;
+        if (this.elements.compressionRatio) {
+          this.elements.compressionRatio.textContent = `압축률: ${compressionRatio}%`;
+        }
       } else {
-        this.elements.compressionRatio.textContent = `크기 조정: ${Math.abs(compressionRatio)}% 증가`;
+        if (this.elements.compressionRatio) {
+          this.elements.compressionRatio.textContent = `크기 조정: ${Math.abs(compressionRatio)}% 증가`;
+        }
       }
     } else {
-      this.elements.compressionRatio.textContent = `압축률: ${compressionRatio}%`;
+      if (this.elements.compressionRatio) {
+        this.elements.compressionRatio.textContent = `압축률: ${compressionRatio}%`;
+      }
     }
 
-    this.elements.compressionInfo.style.display = 'block';
+    if (this.elements.compressionInfo) {
+      this.elements.compressionInfo.style.display = 'block';
+    }
 
     // 이미지 크기는 이미지 로드 후 업데이트
     const img = new Image();
     img.onload = () => {
-      this.elements.processedImageSize.textContent = `${img.naturalWidth} × ${img.naturalHeight}`;
+      if (this.elements.processedImageSize) {
+        this.elements.processedImageSize.textContent = `${img.naturalWidth} × ${img.naturalHeight}`;
+      }
     };
     img.src = URL.createObjectURL(blob);
   }
@@ -253,42 +388,5 @@ export class UIManager {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  // 이미지 소스 설정
-  setImageSource(imageElement, source) {
-    imageElement.src = source;
-  }
-
-  // 다운로드 링크 생성
-  createDownloadLink(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  // 알림 표시
-  showAlert(message) {
-    alert(message);
-  }
-
-  // 성공 메시지 표시
-  showSuccessMessage(originalSize, newSize) {
-    this.showAlert(`크롭 완료!\n원본: ${originalSize}\n크롭된 이미지: ${newSize}`);
-  }
-
-  // DOM 요소 가져오기
-  getElement(name) {
-    return this.elements[name];
-  }
-
-  // 모든 DOM 요소 가져오기
-  getElements() {
-    return this.elements;
   }
 }

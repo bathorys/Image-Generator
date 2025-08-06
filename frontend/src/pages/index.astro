@@ -19,81 +19,81 @@ import '@/styles/main.scss';
 			</header>
 
 			<main class="main-content">
-								<div class="upload-section" id="uploadSection">
+								<div class="upload-section" data-component="upload-section">
 					<div class="upload-icon">📁</div>
 					<div class="upload-text">이미지를 선택하거나 드래그하여 업로드하세요</div>
 					<div class="upload-hint">JPG, PNG, GIF 파일을 지원합니다</div>
-					<input type="file" id="fileInput" class="file-input" accept="image/*" />
+					<input type="file" data-target="file-input" class="file-input" accept="image/*" />
 				</div>
 
 				<!-- 업로드 섹션 작업물 관리 버튼 -->
 				<div class="upload-work-actions">
-					<button class="btn btn-info" id="uploadLoadWorkBtn" title="저장된 작업물을 불러옵니다">📂 저장된 작업물 불러오기</button>
-					<button class="btn btn-warning" id="uploadAutoSaveBtn" title="자동 저장을 토글합니다">🔄 자동저장</button>
+					<button class="btn btn-info" data-action="load-work" data-target="upload" title="저장된 작업물을 불러옵니다">📂 저장된 작업물 불러오기</button>
+					<button class="btn btn-warning" data-action="toggle-auto-save" data-target="upload" title="자동 저장을 토글합니다">🔄 자동저장</button>
 				</div>
 
-				<div class="preview-section" id="previewSection">
+				<div class="preview-section" data-component="preview-section">
 					<div class="preview-container">
-						<div class="preview-box">
+						<div class="preview-box" data-target="original">
 							<h3>원본 이미지</h3>
 							<div class="preview-image-container">
-								<img id="originalImage" class="preview-image" alt="원본 이미지" />
+								<img data-target="original-image" class="preview-image" alt="원본 이미지" />
 							</div>
-							<div class="image-info" id="originalImageInfo">
+							<div class="image-info" data-target="original-info">
 								<div class="info-item">
 									<span class="info-label">파일 크기:</span>
-									<span class="info-value" id="originalFileSize">-</span>
+									<span class="info-value" data-target="original-file-size">-</span>
 								</div>
 								<div class="info-item">
 									<span class="info-label">이미지 크기:</span>
-									<span class="info-value" id="originalImageSize">-</span>
+									<span class="info-value" data-target="original-image-size">-</span>
 								</div>
 								<div class="info-item">
 									<span class="info-label">형식:</span>
-									<span class="info-value" id="originalFormat">-</span>
+									<span class="info-value" data-target="original-format">-</span>
 								</div>
 							</div>
 						</div>
 
-						<div class="preview-box">
+						<div class="preview-box" data-target="processed">
 							<h3>처리된 이미지</h3>
 							<div class="preview-image-container">
-								<img id="processedImage" class="preview-image" alt="처리된 이미지" />
+								<img data-target="processed-image" class="preview-image" alt="처리된 이미지" />
 							</div>
-							<div class="image-info" id="processedImageInfo">
+							<div class="image-info" data-target="processed-info">
 								<div class="info-item">
 									<span class="info-label">파일 크기:</span>
-									<span class="info-value" id="processedFileSize">-</span>
+									<span class="info-value" data-target="processed-file-size">-</span>
 								</div>
 								<div class="info-item">
 									<span class="info-label">이미지 크기:</span>
-									<span class="info-value" id="processedImageSize">-</span>
+									<span class="info-value" data-target="processed-image-size">-</span>
 								</div>
 								<div class="info-item">
 									<span class="info-label">형식:</span>
-									<span class="info-value" id="processedFormat">-</span>
+									<span class="info-value" data-target="processed-format">-</span>
 								</div>
-								<div class="info-item compression-info" id="compressionInfo" style="display: none;">
+								<div class="info-item compression-info" data-target="compression-info" style="display: none;">
 									<span class="info-label">압축률:</span>
-									<span class="info-value" id="compressionRatio">-</span>
+									<span class="info-value" data-target="compression-ratio">-</span>
 								</div>
 							</div>
 						</div>
 					</div>
 
 					<!-- 확대/축소 컨트롤을 위로 이동 -->
-					<div class="zoom-controls">
-						<button class="zoom-btn" id="zoomOutBtn" title="축소">−</button>
-						<span class="zoom-level" id="zoomLevel">100%</span>
-						<button class="zoom-btn" id="zoomInBtn" title="확대">+</button>
-						<button class="zoom-btn" id="resetZoomBtn" title="원본 크기">⟲</button>
+					<div class="zoom-controls" data-component="zoom-controls">
+						<button class="zoom-btn" data-action="zoom-out" title="축소">−</button>
+						<span class="zoom-level" data-target="zoom-level">100%</span>
+						<button class="zoom-btn" data-action="zoom-in" title="확대">+</button>
+						<button class="zoom-btn" data-action="reset-zoom" title="원본 크기">⟲</button>
 					</div>
 
-					<div class="controls-section">
+					<div class="controls-section" data-component="controls-section">
 						<div class="controls-grid">
 							<div class="control-group">
 								<label for="formatSelect">출력 형식</label>
-								<select id="formatSelect">
+								<select data-target="format-select">
 									<option value="original">원본 형식 유지</option>
 									<option value="jpeg">JPEG</option>
 									<option value="png">PNG</option>
@@ -102,97 +102,97 @@ import '@/styles/main.scss';
 							</div>
 
 							<!-- JPEG 품질 설정 -->
-							<div class="control-group" id="jpegQualityGroup">
+							<div class="control-group" data-component="control-group" data-type="jpeg-quality">
 								<label for="jpegQualitySlider">JPEG 품질 (1-100)</label>
-								<input type="range" id="jpegQualitySlider" min="1" max="100" value="80" />
-								<span id="jpegQualityValue">80%</span>
+								<input type="range" data-target="jpeg-quality-slider" min="1" max="100" value="80" />
+								<span data-target="jpeg-quality-value">80%</span>
 							</div>
 
 							<!-- PNG 압축 설정 -->
-							<div class="control-group" id="pngCompressionGroup" style="display: none;">
+							<div class="control-group" data-component="control-group" data-type="png-compression" style="display: none;">
 								<label for="pngCompressionSlider">PNG 압축 레벨 (0-9)</label>
-								<input type="range" id="pngCompressionSlider" min="0" max="9" value="6" />
-								<span id="pngCompressionValue">6</span>
+								<input type="range" data-target="png-compression-slider" min="0" max="9" value="6" />
+								<span data-target="png-compression-value">6</span>
 								<small>0-3: 원본 크기, 4-6: 약간 축소, 7-9: 크게 축소</small>
 							</div>
 
 							<!-- WebP 품질 설정 -->
-							<div class="control-group" id="webpQualityGroup" style="display: none;">
+							<div class="control-group" data-component="control-group" data-type="webp-quality" style="display: none;">
 								<label for="webpQualitySlider">WebP 품질 (1-100)</label>
-								<input type="range" id="webpQualitySlider" min="1" max="100" value="80" />
-								<span id="webpQualityValue">80%</span>
+								<input type="range" data-target="webp-quality-slider" min="1" max="100" value="80" />
+								<span data-target="webp-quality-value">80%</span>
 								<div class="checkbox-group">
-									<input type="checkbox" id="webpTransparency" />
+									<input type="checkbox" data-target="webp-transparency" />
 									<label for="webpTransparency">투명도 지원</label>
 								</div>
 							</div>
 
 							<div class="control-group">
 								<label for="maxWidth">최대 너비 (px)</label>
-								<input type="number" id="maxWidth" placeholder="자동" />
+								<input type="number" data-target="max-width" placeholder="자동" />
 							</div>
 							<div class="control-group">
 								<label for="maxHeight">최대 높이 (px)</label>
-								<input type="number" id="maxHeight" placeholder="자동" />
+								<input type="number" data-target="max-height" placeholder="자동" />
 							</div>
 						</div>
 
-						<div class="action-buttons">
-							<button class="btn btn-primary" id="processBtn" title="업로드된 이미지를 선택한 설정으로 처리합니다">이미지 처리</button>
-							<button class="btn btn-secondary" id="cropBtn" title="이미지의 특정 영역을 선택하여 크롭합니다">크롭 모드</button>
-							<button class="btn btn-success" id="downloadBtn" title="처리된 이미지를 다운로드합니다">다운로드</button>
-							<button class="btn btn-warning" id="resetImageBtn" title="업로드된 이미지를 초기화하고 새 이미지를 업로드할 수 있습니다">이미지 초기화</button>
-							<button class="btn btn-secondary" id="resetBtn" title="모든 설정을 초기화하고 처음부터 다시 시작합니다">새로 시작</button>
+						<div class="action-buttons" data-component="main-action-buttons">
+							<button class="btn btn-primary" data-action="process-image" title="업로드된 이미지를 선택한 설정으로 처리합니다">이미지 처리</button>
+							<button class="btn btn-secondary" data-action="crop-mode" title="이미지의 특정 영역을 선택하여 크롭합니다">크롭 모드</button>
+							<button class="btn btn-success" data-action="download-image" title="처리된 이미지를 다운로드합니다">다운로드</button>
+							<button class="btn btn-warning" data-action="reset-image" title="업로드된 이미지를 초기화하고 새 이미지를 업로드할 수 있습니다">이미지 초기화</button>
+							<button class="btn btn-secondary" data-action="reset-all" title="모든 설정을 초기화하고 처음부터 다시 시작합니다">새로 시작</button>
 						</div>
 
-						<div class="work-actions">
-							<button class="btn btn-info" id="saveWorkBtn" title="현재 작업물을 저장합니다">작업물 저장</button>
-							<button class="btn btn-info" id="loadWorkBtn" title="저장된 작업물 목록을 불러옵니다">작업물 불러오기</button>
-							<button class="btn btn-warning" id="autoSaveBtn" title="자동 저장을 토글합니다">자동저장</button>
-							<button class="btn btn-danger" id="clearWorksBtn" title="모든 저장된 작업물을 삭제합니다">작업물 삭제</button>
+						<div class="work-actions" data-component="work-actions">
+							<button class="btn btn-info" data-action="save-work" title="현재 작업물을 저장합니다">작업물 저장</button>
+							<button class="btn btn-info" data-action="load-work" title="저장된 작업물 목록을 불러옵니다">작업물 불러오기</button>
+							<button class="btn btn-warning" data-action="toggle-auto-save" title="자동 저장을 토글합니다">자동저장</button>
+							<button class="btn btn-danger" data-action="clear-works" title="모든 저장된 작업물을 삭제합니다">작업물 삭제</button>
 						</div>
 
 						<!-- 사이즈 별 저장 옵션 -->
-						<div class="size-options" id="sizeOptions" style="display: none;">
+						<div class="size-options" data-component="size-options" style="display: none;">
 							<h4>저장 크기 선택</h4>
 							<div class="size-checkboxes">
 								<div class="size-option">
-									<input type="checkbox" id="size1x" value="1" checked />
+									<input type="checkbox" data-target="size-1x" value="1" checked />
 									<label for="size1x">@x1 (원본 크기)</label>
 								</div>
 								<div class="size-option">
-									<input type="checkbox" id="size2x" value="2" />
+									<input type="checkbox" data-target="size-2x" value="2" />
 									<label for="size2x">@x2 (2배 크기)</label>
 								</div>
 								<div class="size-option">
-									<input type="checkbox" id="size3x" value="3" />
+									<input type="checkbox" data-target="size-3x" value="3" />
 									<label for="size3x">@x3 (3배 크기)</label>
 								</div>
 							</div>
-							<button class="btn btn-primary" id="downloadMultiBtn">선택한 크기로 다운로드</button>
+							<button class="btn btn-primary" data-action="download-multi">선택한 크기로 다운로드</button>
 						</div>
 					</div>
 
-					<div class="crop-section" id="cropSection">
+					<div class="crop-section" data-component="crop-section">
 						<h3>이미지 크롭</h3>
 						<p>드래그하여 크롭 영역을 선택하세요</p>
 						<div class="crop-container">
-							<img id="cropImage" class="crop-image" alt="크롭할 이미지" />
-							<div class="crop-overlay" id="cropOverlay">
+							<img data-target="crop-image" class="crop-image" alt="크롭할 이미지" />
+							<div class="crop-overlay" data-target="crop-overlay">
 								<!-- 모서리 핸들 -->
-								<div class="crop-handle nw" id="cropHandleNW"></div>
-								<div class="crop-handle n" id="cropHandleN"></div>
-								<div class="crop-handle ne" id="cropHandleNE"></div>
-								<div class="crop-handle w" id="cropHandleW"></div>
-								<div class="crop-handle e" id="cropHandleE"></div>
-								<div class="crop-handle sw" id="cropHandleSW"></div>
-								<div class="crop-handle s" id="cropHandleS"></div>
-								<div class="crop-handle se" id="cropHandleSE"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="nw"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="n"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="ne"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="w"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="e"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="sw"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="s"></div>
+								<div class="crop-handle" data-target="crop-handle" data-position="se"></div>
 							</div>
 						</div>
-						<div class="action-buttons">
-							<button class="btn btn-success" id="applyCropBtn">크롭 적용</button>
-							<button class="btn btn-secondary" id="cancelCropBtn">취소</button>
+						<div class="action-buttons" data-component="crop-action-buttons">
+							<button class="btn btn-success" data-action="apply-crop">크롭 적용</button>
+							<button class="btn btn-secondary" data-action="cancel-crop">취소</button>
 						</div>
 					</div>
 				</div>
@@ -217,17 +217,17 @@ import '@/styles/main.scss';
 		</footer>
 
 		<!-- 작업물 목록 모달 -->
-		<div class="work-modal" id="workModal">
+		<div class="work-modal" data-component="work-modal">
 			<div class="work-modal-content">
 				<div class="work-modal-header">
 					<h3>저장된 작업물</h3>
-					<button class="close-btn" id="closeWorkModal">&times;</button>
+					<button class="close-btn" data-action="close-modal" data-target="work-modal">&times;</button>
 				</div>
 				<div class="work-modal-body">
-					<div class="work-list" id="workList">
+					<div class="work-list" data-target="work-list">
 						<!-- 작업물 목록이 여기에 동적으로 추가됩니다 -->
 					</div>
-					<div class="work-empty" id="workEmpty" style="display: none;">
+					<div class="work-empty" data-target="work-empty" style="display: none;">
 						<p>저장된 작업물이 없습니다.</p>
 					</div>
 				</div>
@@ -235,35 +235,35 @@ import '@/styles/main.scss';
 		</div>
 
 		<!-- 작업물 저장 모달 -->
-		<div class="work-save-modal" id="workSaveModal">
+		<div class="work-save-modal" data-component="work-save-modal">
 			<div class="work-save-modal-content">
 				<div class="work-save-modal-header">
 					<h3>작업물 저장</h3>
-					<button class="close-btn" id="closeWorkSaveModal">&times;</button>
+					<button class="close-btn" data-action="close-modal" data-target="work-save-modal">&times;</button>
 				</div>
 				<div class="work-save-modal-body">
 					<div class="form-group">
 						<label for="workNameInput">작업물 이름</label>
-						<input type="text" id="workNameInput" placeholder="작업물 이름을 입력하세요" />
+						<input type="text" data-target="work-name-input" placeholder="작업물 이름을 입력하세요" />
 					</div>
 					<div class="work-save-preview">
 						<h4>저장할 내용</h4>
 						<div class="preview-item">
 							<span class="preview-label">원본 이미지:</span>
-							<span class="preview-value" id="saveOriginalPreview">-</span>
+							<span class="preview-value" data-target="save-original-preview">-</span>
 						</div>
 						<div class="preview-item">
 							<span class="preview-label">처리된 이미지:</span>
-							<span class="preview-value" id="saveProcessedPreview">-</span>
+							<span class="preview-value" data-target="save-processed-preview">-</span>
 						</div>
 						<div class="preview-item">
 							<span class="preview-label">설정:</span>
-							<span class="preview-value" id="saveSettingsPreview">-</span>
+							<span class="preview-value" data-target="save-settings-preview">-</span>
 						</div>
 					</div>
 					<div class="work-save-actions">
-						<button class="btn btn-primary" id="confirmSaveWorkBtn">저장</button>
-						<button class="btn btn-secondary" id="cancelSaveWorkBtn">취소</button>
+						<button class="btn btn-primary" data-action="confirm-save-work">저장</button>
+						<button class="btn btn-secondary" data-action="cancel-save-work">취소</button>
 					</div>
 				</div>
 			</div>

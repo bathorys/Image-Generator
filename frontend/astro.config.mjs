@@ -5,7 +5,8 @@ import path from 'path';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://bathorys.github.io',
-  base: '/Image-Generator',
+  // 개발 환경에서는 base 경로를 제거
+  // base: '/Image-Generator',
   vite: {
     css: {
       preprocessorOptions: {

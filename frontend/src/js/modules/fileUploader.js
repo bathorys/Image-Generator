@@ -65,4 +65,23 @@ export class FileUploader {
   reset() {
     this.originalFile = null;
   }
+
+  // 원본 파일 설정 (작업물 불러오기용)
+  setOriginalFile(imageSrc) {
+    // Base64 이미지를 File 객체로 변환
+    if (imageSrc.startsWith('data:image/')) {
+      // Base64 문자열을 Blob으로 변환
+      const byteString = atob(imageSrc.split(',')[1]);
+      const mimeString = imageSrc.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      const blob = new Blob([ab], { type: mimeString });
+      this.originalFile = new File([blob], 'restored-image.jpg', { type: mimeString });
+    }
+  }
 }

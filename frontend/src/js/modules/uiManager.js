@@ -9,15 +9,6 @@ export class UIManager {
 
   // DOM 요소 초기화 - Data Attributes 기반
   initializeElements() {
-    console.log('DOM 요소 초기화 시작...');
-
-    // DOM이 준비되었는지 확인
-    if (document.readyState === 'loading') {
-      console.log('DOM이 아직 로딩 중입니다. 잠시 후 다시 시도합니다.');
-      setTimeout(() => this.initializeElements(), 100);
-      return;
-    }
-
     this.elements = {
       // 업로드 섹션
       uploadSection: DOMSelector.component('upload-section'),
@@ -118,21 +109,9 @@ export class UIManager {
       closeWorkSaveModal: DOMSelector.modalCloseButton('work-save-modal'),
 
       // 이미지 컨테이너들 (부모 요소)
-      originalImageContainer: DOMSelector.target('original')?.querySelector('.preview-image-container'),
-      processedImageContainer: DOMSelector.target('processed')?.querySelector('.preview-image-container')
+      originalImageContainer: DOMSelector.target('original').querySelector('.preview-image-container'),
+      processedImageContainer: DOMSelector.target('processed').querySelector('.preview-image-container')
     };
-
-    // 디버깅: crop handle들이 제대로 찾아졌는지 확인
-    console.log('Crop handles found:', {
-      nw: !!this.elements.cropHandleNW,
-      n: !!this.elements.cropHandleN,
-      ne: !!this.elements.cropHandleNE,
-      w: !!this.elements.cropHandleW,
-      e: !!this.elements.cropHandleE,
-      sw: !!this.elements.cropHandleSW,
-      s: !!this.elements.cropHandleS,
-      se: !!this.elements.cropHandleSE
-    });
   }
 
   // 품질 값 업데이트

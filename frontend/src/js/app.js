@@ -123,7 +123,7 @@ export class ImageGeneratorApp {
       }
       this.uiManager.showPreview();
     } catch (error) {
-      this.uiManager.showAlert(error.message);
+      this.uiManager.showErrorMessage(error.message);
     }
   }
 
@@ -131,7 +131,7 @@ export class ImageGeneratorApp {
   async processImage() {
     const originalFile = this.fileUploader.getOriginalFile();
     if (!originalFile) {
-      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
+      this.uiManager.showWarningMessage('먼저 이미지를 업로드해주세요.');
       return;
     }
 
@@ -149,14 +149,14 @@ export class ImageGeneratorApp {
       this.uiManager.setImageSource(elements.processedImage, url);
     } catch (error) {
       console.error('이미지 처리 중 오류:', error);
-      this.uiManager.showAlert('이미지 처리 중 오류가 발생했습니다.');
+      this.uiManager.showErrorMessage('이미지 처리 중 오류가 발생했습니다.');
     }
   }
 
   // 크롭 모드 토글
   toggleCropMode() {
     if (!this.processedBlob) {
-      this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
+      this.uiManager.showWarningMessage('먼저 이미지를 처리해주세요.');
       return;
     }
 
@@ -211,7 +211,7 @@ export class ImageGeneratorApp {
     try {
       const elements = this.uiManager.getElements();
       if (!elements.cropImage || !elements.formatSelect || !elements.jpegQualitySlider) {
-        this.uiManager.showAlert('필요한 요소를 찾을 수 없습니다.');
+        this.uiManager.showErrorMessage('필요한 요소를 찾을 수 없습니다.');
         return;
       }
 
@@ -240,7 +240,7 @@ export class ImageGeneratorApp {
       this.uiManager.showSuccessMessage(originalSize, newSize);
     } catch (error) {
       console.error('크롭 처리 중 오류:', error);
-      this.uiManager.showAlert('크롭 처리 중 오류가 발생했습니다.');
+      this.uiManager.showErrorMessage('크롭 처리 중 오류가 발생했습니다.');
     }
   }
 
@@ -256,7 +256,7 @@ export class ImageGeneratorApp {
   // 이미지 다운로드 (단일 사이즈)
   downloadImage() {
     if (!this.processedBlob) {
-      this.uiManager.showAlert('먼저 이미지를 처리해주세요.');
+      this.uiManager.showWarningMessage('먼저 이미지를 처리해주세요.');
       return;
     }
 

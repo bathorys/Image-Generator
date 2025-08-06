@@ -60,7 +60,7 @@ npm run build
 
 ### 프론트엔드
 - **Astro 5.12.8**: 정적 사이트 생성
-- **SCSS**: 모던한 CSS 전처리기
+- **SCSS**: 모던한 CSS 전처리기 (CSS 파일 사용하지 않음)
 - **Vanilla JavaScript**: 순수 JavaScript로 구현
 - **Canvas API**: 이미지 처리
 

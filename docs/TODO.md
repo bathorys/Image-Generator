@@ -4,7 +4,7 @@
 - [x] **크롭 정보 실시간 표시**: 크롭 영역의 X, Y, Width, Height 정보를 실시간으로 표시
 - [x] **크롭 정보 직접 입력**: input 필드를 통해 정확한 픽셀 값으로 크롭 영역 설정 가능
 - [x] **작업물 관리 통합**: 이미지 업로드 화면에서도 작업물 삭제 기능 추가, work-actions 영역을 upload-work-actions와 통합하여 불필요한 중복 제거
-- [x] **Sticky 버튼 수정**: action-buttons와 work-actions의 position: sticky가 제대로 작동하도록 수정
+- [ ] **Sticky 버튼 수정**: action-buttons와 work-actions의 position: sticky가 제대로 작동하도록 수정
 - [ ] 이미지 처리 성능 최적화
 - [ ] 배치 처리 기능 추가
 - [ ] 드래그 앤 드롭 개선
@@ -13,7 +13,7 @@
 - [ ] 다국어 지원 (영어, 일본어 등)
 
 ## UI/UX 개선
-- [ ] **Snackbar 시스템 구축**: alert로 표시되는 메시지들을 모던한 snackbar 레이어로 교체하여 더 나은 사용자 경험 제공
+- [x] **Snackbar 시스템 구축**: alert로 표시되는 메시지들을 모던한 snackbar 레이어로 교체하여 더 나은 사용자 경험 제공
 - [ ] **모달 ESC 키 지원**: 저장된 작업물 팝업에서 ESC 키 클릭 시 팝업 닫기 기능 추가
 - [ ] 로딩 애니메이션 개선
 - [ ] 에러 메시지 표시 개선

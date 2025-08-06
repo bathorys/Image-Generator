@@ -180,14 +180,35 @@ export class UIManager {
     URL.revokeObjectURL(url);
   }
 
-  // 알림 표시
-  showAlert(message) {
-    alert(message);
+  // 알림 표시 (Snackbar 사용)
+  showAlert(message, type = 'info', duration = 4000) {
+    if (window.snackbarManager) {
+      window.snackbarManager.show(message, type, duration);
+    } else {
+      // fallback으로 alert 사용
+      alert(message);
+    }
   }
 
   // 성공 메시지 표시
   showSuccessMessage(originalSize, newSize) {
-    this.showAlert(`크롭 완료!\n원본: ${originalSize}\n크롭된 이미지: ${newSize}`);
+    const message = `크롭 완료!\n원본: ${originalSize}\n크롭된 이미지: ${newSize}`;
+    this.showAlert(message, 'success', 5000);
+  }
+
+  // 에러 메시지 표시
+  showErrorMessage(message, duration = 6000) {
+    this.showAlert(message, 'error', duration);
+  }
+
+  // 경고 메시지 표시
+  showWarningMessage(message, duration = 5000) {
+    this.showAlert(message, 'warning', duration);
+  }
+
+  // 정보 메시지 표시
+  showInfoMessage(message, duration = 4000) {
+    this.showAlert(message, 'info', duration);
   }
 
   // DOM 요소 가져오기

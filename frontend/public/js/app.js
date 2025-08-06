@@ -531,10 +531,10 @@ export class ImageGeneratorApp {
         this.uiManager.createDownloadLink(result.blob, fileName);
       }
 
-      this.uiManager.showAlert(`${results.length}개 파일이 다운로드되었습니다.`);
+      this.uiManager.showSuccessMessage(`${results.length}개 파일이 다운로드되었습니다.`);
     } catch (error) {
       console.error('다중 사이즈 다운로드 중 오류:', error);
-      this.uiManager.showAlert('다운로드 중 오류가 발생했습니다.');
+      this.uiManager.showErrorMessage('다운로드 중 오류가 발생했습니다.');
     }
   }
 
@@ -571,7 +571,7 @@ export class ImageGeneratorApp {
       this.updateCropButtonText();
     } catch (error) {
       console.error('파일 로드 중 오류:', error);
-      this.uiManager.showAlert(error.message);
+      this.uiManager.showErrorMessage(error.message);
     }
   }
 
@@ -579,7 +579,7 @@ export class ImageGeneratorApp {
   async processImage() {
     const originalFile = this.fileUploader.getOriginalFile();
     if (!originalFile) {
-      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
+      this.uiManager.showWarningMessage('먼저 이미지를 업로드해주세요.');
       return;
     }
 
@@ -612,7 +612,7 @@ export class ImageGeneratorApp {
       this.updateCropButtonText();
     } catch (error) {
       console.error('이미지 처리 중 오류:', error);
-      this.uiManager.showAlert('이미지 처리 중 오류가 발생했습니다.');
+      this.uiManager.showErrorMessage('이미지 처리 중 오류가 발생했습니다.');
     }
   }
 
@@ -620,7 +620,7 @@ export class ImageGeneratorApp {
   toggleCropMode() {
     const originalFile = this.fileUploader.getOriginalFile();
     if (!originalFile) {
-      this.uiManager.showAlert('먼저 이미지를 업로드해주세요.');
+      this.uiManager.showWarningMessage('먼저 이미지를 업로드해주세요.');
       return;
     }
 
@@ -892,7 +892,7 @@ export class ImageGeneratorApp {
     const workName = elements.workNameInput.value.trim();
 
     if (!workName) {
-      this.uiManager.showAlert('작업물 이름을 입력해주세요.');
+      this.uiManager.showWarningMessage('작업물 이름을 입력해주세요.');
       return;
     }
 
@@ -905,10 +905,10 @@ export class ImageGeneratorApp {
     const success = await this.workManager.saveWork(workData);
 
     if (success) {
-      this.uiManager.showAlert('작업물이 저장되었습니다.');
+      this.uiManager.showSuccessMessage('작업물이 저장되었습니다.');
       this.hideSaveWorkModal();
     } else {
-      this.uiManager.showAlert('작업물 저장에 실패했습니다.');
+      this.uiManager.showErrorMessage('작업물 저장에 실패했습니다.');
     }
   }
 
@@ -1038,10 +1038,10 @@ export class ImageGeneratorApp {
       // 버튼 상태 업데이트
       this.updateButtonStates();
 
-      this.uiManager.showAlert('작업물을 불러왔습니다.');
+      this.uiManager.showSuccessMessage('작업물을 불러왔습니다.');
     } catch (error) {
       console.error('작업물 불러오기 실패:', error);
-      this.uiManager.showAlert('작업물을 불러오는 중 오류가 발생했습니다. 이미지 데이터가 손상되었을 수 있습니다.');
+      this.uiManager.showErrorMessage('작업물을 불러오는 중 오류가 발생했습니다. 이미지 데이터가 손상되었을 수 있습니다.');
     }
   }
 
@@ -1169,11 +1169,11 @@ export class ImageGeneratorApp {
     if (confirm('이 작업물을 삭제하시겠습니까?')) {
       const success = await this.workManager.deleteWork(workId);
       if (success) {
-        this.uiManager.showAlert('작업물이 삭제되었습니다.');
+        this.uiManager.showSuccessMessage('작업물이 삭제되었습니다.');
         // 목록 새로고침
         await this.showWorkListModal();
       } else {
-        this.uiManager.showAlert('작업물 삭제에 실패했습니다.');
+        this.uiManager.showErrorMessage('작업물 삭제에 실패했습니다.');
       }
     }
   }
@@ -1193,7 +1193,7 @@ export class ImageGeneratorApp {
     // elements.uploadAutoSaveBtn.classList.toggle('btn-success', this.autoSaveEnabled);
     // elements.uploadAutoSaveBtn.classList.toggle('btn-warning', !this.autoSaveEnabled);
 
-    this.uiManager.showAlert(
+    this.uiManager.showInfoMessage(
       this.autoSaveEnabled ? '자동 저장이 활성화되었습니다.' : '자동 저장이 비활성화되었습니다.'
     );
   }
@@ -1203,9 +1203,9 @@ export class ImageGeneratorApp {
     if (confirm('모든 저장된 작업물을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       const success = await this.workManager.clearAllWorks();
       if (success) {
-        this.uiManager.showAlert('모든 작업물이 삭제되었습니다.');
+        this.uiManager.showSuccessMessage('모든 작업물이 삭제되었습니다.');
       } else {
-        this.uiManager.showAlert('작업물 삭제에 실패했습니다.');
+        this.uiManager.showErrorMessage('작업물 삭제에 실패했습니다.');
       }
     }
   }

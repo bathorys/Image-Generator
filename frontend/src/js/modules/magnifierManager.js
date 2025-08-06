@@ -109,6 +109,9 @@ export class MagnifierManager {
       y: e.clientY - this.currentPosition.y
     };
 
+    // 드래그 시작 시 transition 비활성화
+    this.setTransition(false);
+
     e.preventDefault();
   }
 
@@ -127,5 +130,22 @@ export class MagnifierManager {
   // 드래그 종료
   endDrag() {
     this.isDragging = false;
+
+    // 드래그 종료 시 transition 재활성화
+    this.setTransition(true);
+  }
+
+  // transition 설정
+  setTransition(enabled) {
+    const elements = this.uiManager.getElements();
+    const processedImage = elements.processedImage;
+    const originalImage = elements.originalImage;
+
+    if (processedImage) {
+      processedImage.style.transition = enabled ? 'transform 0.3s ease' : 'none';
+    }
+    if (originalImage) {
+      originalImage.style.transition = enabled ? 'transform 0.3s ease' : 'none';
+    }
   }
 }

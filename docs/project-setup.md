@@ -207,11 +207,30 @@ DOM 조작과 UI 상태를 관리합니다.
 
 ## 배포
 
-### 정적 사이트 호스팅
+### 환경별 설정
+프로젝트는 환경에 따라 다른 설정을 사용합니다:
+
+- **로컬 개발**: `npm run dev` - base 경로 없음
+- **로컬 빌드**: `npm run build` - base 경로 없음
+- **GitHub Pages 배포**: `npm run build:gh-pages` - `/Image-Generator` base 경로 설정
+
+### GitHub Pages 배포
+1. GitHub 저장소에서 Settings > Pages로 이동
+2. Source를 GitHub Actions로 설정
+3. main 브랜치에 푸시하면 자동으로 배포됩니다
+4. 배포 URL: https://bathorys.github.io/Image-Generator
+
+### 로컬 빌드
 ```bash
+cd frontend
 npm run build
 ```
-빌드된 파일은 `dist/` 디렉토리에 생성됩니다.
+
+### GitHub Pages용 빌드
+```bash
+cd frontend
+npm run build:gh-pages
+```
 
 ### 지원하는 호스팅 서비스
 - Netlify

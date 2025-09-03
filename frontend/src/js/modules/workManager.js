@@ -230,10 +230,13 @@ export class WorkManager {
       webpTransparency: false,
       maxWidth: '',
       maxHeight: '',
+      widthPreset: '',
       sizeOptions: {
         size1x: true,
+        size1_5x: false,
         size2x: false,
-        size3x: false
+        size3x: false,
+        size4x: false
       }
     };
   }

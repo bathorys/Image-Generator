@@ -152,6 +152,15 @@ import Snackbar from '@/components/Snackbar.astro';
 							</div>
 
 							<div class="control-group">
+								<label for="widthPreset">해상도 프리셋</label>
+								<select data-target="width-preset">
+									<option value="">사용자 지정</option>
+									<option value="3840">3840 px — 4K (UHD)</option>
+									<option value="2560">2560 px — 2K (QHD)</option>
+									<option value="1920">1920 px — FHD (1080p)</option>
+								</select>
+							</div>
+							<div class="control-group">
 								<label for="maxWidth">최대 너비 (px)</label>
 								<input type="number" data-target="max-width" placeholder="자동" />
 							</div>
@@ -175,6 +184,10 @@ import Snackbar from '@/components/Snackbar.astro';
 							<h4>저장 크기 선택</h4>
 							<div class="size-checkboxes">
 								<div class="size-option">
+									<input type="checkbox" data-target="size-1_5x" value="1.5" />
+									<label for="size1_5x">@x1.5 (1.5배 크기)</label>
+								</div>
+								<div class="size-option">
 									<input type="checkbox" data-target="size-1x" value="1" checked />
 									<label for="size1x">@x1 (원본 크기)</label>
 								</div>
@@ -185,6 +198,10 @@ import Snackbar from '@/components/Snackbar.astro';
 								<div class="size-option">
 									<input type="checkbox" data-target="size-3x" value="3" />
 									<label for="size3x">@x3 (3배 크기)</label>
+								</div>
+								<div class="size-option">
+									<input type="checkbox" data-target="size-4x" value="4" />
+									<label for="size4x">@x4 (4배 크기)</label>
 								</div>
 							</div>
 							<button class="btn btn-success" data-action="download-multi">다운로드</button>

@@ -257,9 +257,116 @@ export class ImageGeneratorApp {
 
       // 크롭 버튼 텍스트 업데이트
       this.updateCropButtonText();
+
+      // 업로드 직후 자동 제안: 웹 최적화 기준 크기 + 배율 옵션
+      await this.suggestOptimizedSizes(file);
     } catch (error) {
       console.error('파일 로드 중 오류:', error);
       this.uiManager.showErrorMessage(error.message);
+    }
+  }
+
+  // 업로드된 원본 기준으로 웹 최적화 크기와 배율 제안
+  async suggestOptimizedSizes(file) {
+    try {
+      const meta = await this.imageProcessor.getImageMetadata(file);
+      const { width, height } = meta;
+      const elements = this.uiManager.getElements();
+
+      // 기준: 모니터 FHD에 맞춰 긴 변 기준 1920(원본 이내로 제한)
+      const longEdge = Math.max(width, height);
+      const baseLong = Math.min(longEdge, 1920);
+
+      // 같은 비율로 단축 변 계산
+      const ratio = baseLong / longEdge;
+      const baseW = Math.round(width * ratio);
+      const baseH = Math.round(height * ratio);
+
+      // 입력칸 채우기 (너비 우선 제안)
+      if (elements.maxWidth) elements.maxWidth.value = String(baseW);
+      if (elements.widthPreset) {
+        // baseLong을 가장 가까운 프리셋으로 표시만 동기화 (값은 baseW 직접 입력)
+        const presets = ['3840','2560','1920'];
+        const nearest = presets.find(p => parseInt(p, 10) === baseLong) || '';
+        elements.widthPreset.value = nearest;
+      }
+      if (elements.maxHeight) elements.maxHeight.value = '';
+
+      // 배율 체크: base*2, *3이 원본 내이면 활성화, 아니면 비활성화
+      const can1_5x = baseW * 1.5 <= width && baseH * 1.5 <= height;
+      const can2x = baseW * 2 <= width && baseH * 2 <= height;
+      const can3x = baseW * 3 <= width && baseH * 3 <= height;
+      const can4x = baseW * 4 <= width && baseH * 4 <= height;
+
+      // 기본은 1x 체크 유지, 2x/3x는 가능할 때만 체크
+      if (elements.size1x) elements.size1x.checked = true;
+      if (elements.size1_5x) {
+        elements.size1_5x.disabled = !can1_5x;
+        elements.size1_5x.checked = can1_5x; // 자동 체크
+      }
+      if (elements.size2x) {
+        elements.size2x.disabled = !can2x;
+        elements.size2x.checked = can2x; // 자동 체크
+      }
+      if (elements.size3x) {
+        elements.size3x.disabled = !can3x;
+        elements.size3x.checked = false && can3x; // 기본은 3x는 체크 해제
+      }
+      if (elements.size4x) {
+        elements.size4x.disabled = !can4x;
+        elements.size4x.checked = false && can4x; // 기본은 4x는 체크 해제
+      }
+
+      // 사이즈 옵션 영역 노출
+      this.uiManager.showSizeOptions();
+    } catch (_) {
+      // 메타데이터 실패 시 무시
+    }
+  }
+
+  // 현재 maxWidth/maxHeight와 원본을 기준으로 배율 선택 가능 여부를 갱신
+  updateMultiplierAvailability() {
+    try {
+      const elements = this.uiManager.getElements();
+      const file = this.fileUploader.getOriginalFile();
+      if (!file) return;
+      this.imageProcessor.getImageMetadata(file).then(meta => {
+        const { width, height } = meta;
+        const mw = parseInt(elements.maxWidth?.value || '0', 10) || null;
+        const mh = parseInt(elements.maxHeight?.value || '0', 10) || null;
+
+        // 실제 처리 로직과 동일하게 비율을 계산하여 기준 크기 산출
+        const maxW = mw || width;
+        const maxH = mh || height;
+        const ratio = Math.min(maxW / width, maxH / height);
+        const baseW = Math.round(width * ratio);
+        const baseH = Math.round(height * ratio);
+
+        // 배율 가능 여부
+        const can15 = baseW * 1.5 <= width && baseH * 1.5 <= height;
+        const can2 = baseW * 2 <= width && baseH * 2 <= height;
+        const can3 = baseW * 3 <= width && baseH * 3 <= height;
+        const can4 = baseW * 4 <= width && baseH * 4 <= height;
+
+        if (elements.size1_5x) {
+          elements.size1_5x.disabled = !can15;
+          if (!can15) elements.size1_5x.checked = false;
+        }
+        if (elements.size2x) {
+          elements.size2x.disabled = !can2;
+          if (!can2) elements.size2x.checked = false;
+        }
+        if (elements.size3x) {
+          elements.size3x.disabled = !can3;
+          if (!can3) elements.size3x.checked = false;
+        }
+        if (elements.size4x) {
+          elements.size4x.disabled = !can4;
+          if (!can4) elements.size4x.checked = false;
+        }
+      });
+    } catch (_) {
+      // 무시
     }
   }
 

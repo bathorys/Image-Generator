@@ -47,6 +47,7 @@ export class UIManager {
       webpTransparency: DOMSelector.target('webp-transparency'),
       maxWidth: DOMSelector.target('max-width'),
       maxHeight: DOMSelector.target('max-height'),
+      widthPreset: DOMSelector.widthPreset(),
 
       // 액션 버튼들
       processBtn: DOMSelector.action('process-image'),
@@ -96,9 +97,11 @@ export class UIManager {
 
       // 사이즈 옵션
       sizeOptions: DOMSelector.component('size-options'),
+      size1_5x: DOMSelector.sizeOption('1_5x'),
       size1x: DOMSelector.sizeOption('1x'),
       size2x: DOMSelector.sizeOption('2x'),
       size3x: DOMSelector.sizeOption('3x'),
+      size4x: DOMSelector.sizeOption('4x'),
       downloadMultiBtn: DOMSelector.action('download-multi'),
 
       // 모달들
@@ -287,11 +290,17 @@ export class UIManager {
     if (this.elements.size1x && this.elements.size1x.checked) {
       selectedSizes.push(1);
     }
+    if (this.elements.size1_5x && this.elements.size1_5x.checked) {
+      selectedSizes.push(1.5);
+    }
     if (this.elements.size2x && this.elements.size2x.checked) {
       selectedSizes.push(2);
     }
     if (this.elements.size3x && this.elements.size3x.checked) {
       selectedSizes.push(3);
+    }
+    if (this.elements.size4x && this.elements.size4x.checked) {
+      selectedSizes.push(4);
     }
 
     return selectedSizes;

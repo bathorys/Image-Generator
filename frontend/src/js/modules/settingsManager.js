@@ -201,6 +201,7 @@ export class SettingsManager {
       elements.maxWidth.addEventListener('input', () => {
         this.app.autoSaveWork();
         this.scheduleAutoProcess();
+        this.app.updateMultiplierAvailability?.();
       });
     }
 
@@ -208,6 +209,19 @@ export class SettingsManager {
       elements.maxHeight.addEventListener('input', () => {
         this.app.autoSaveWork();
         this.scheduleAutoProcess();
+        this.app.updateMultiplierAvailability?.();
+      });
+    }
+
+    if (elements.widthPreset) {
+      elements.widthPreset.addEventListener('change', () => {
+        const v = elements.widthPreset.value;
+        if (elements.maxWidth) {
+          elements.maxWidth.value = v || '';
+        }
+        this.app.autoSaveWork();
+        this.scheduleAutoProcess();
+        this.app.updateMultiplierAvailability?.();
       });
     }
 
@@ -243,6 +257,12 @@ export class SettingsManager {
       });
     }
 
+    if (elements.size1_5x) {
+      elements.size1_5x.addEventListener('change', () => {
+        this.app.autoSaveWork();
+      });
+    }
+
     if (elements.size2x) {
       elements.size2x.addEventListener('change', () => {
         this.app.autoSaveWork();
@@ -251,6 +271,11 @@ export class SettingsManager {
 
     if (elements.size3x) {
       elements.size3x.addEventListener('change', () => {
+        this.app.autoSaveWork();
+      });
+    }
+    if (elements.size4x) {
+      elements.size4x.addEventListener('change', () => {
         this.app.autoSaveWork();
       });
     }
@@ -326,10 +351,13 @@ export class SettingsManager {
       webpTransparency: elements.webpTransparency?.checked || false,
       maxWidth: elements.maxWidth?.value || '',
       maxHeight: elements.maxHeight?.value || '',
+      widthPreset: elements.widthPreset?.value || '',
       sizeOptions: {
         size1x: elements.size1x?.checked || true,
+        size1_5x: elements.size1_5x?.checked || false,
         size2x: elements.size2x?.checked || false,
-        size3x: elements.size3x?.checked || false
+        size3x: elements.size3x?.checked || false,
+        size4x: elements.size4x?.checked || false
       }
     };
   }
@@ -387,17 +415,26 @@ export class SettingsManager {
     if (settings.maxHeight !== undefined && elements.maxHeight) {
       elements.maxHeight.value = settings.maxHeight;
     }
+    if (settings.widthPreset !== undefined && elements.widthPreset) {
+      elements.widthPreset.value = settings.widthPreset;
+    }
 
     // 사이즈 옵션 설정
     if (settings.sizeOptions) {
       if (elements.size1x && settings.sizeOptions.size1x !== undefined) {
         elements.size1x.checked = settings.sizeOptions.size1x;
       }
+      if (elements.size1_5x && settings.sizeOptions.size1_5x !== undefined) {
+        elements.size1_5x.checked = settings.sizeOptions.size1_5x;
+      }
       if (elements.size2x && settings.sizeOptions.size2x !== undefined) {
         elements.size2x.checked = settings.sizeOptions.size2x;
       }
       if (elements.size3x && settings.sizeOptions.size3x !== undefined) {
         elements.size3x.checked = settings.sizeOptions.size3x;
+      }
+      if (elements.size4x && settings.sizeOptions.size4x !== undefined) {
+        elements.size4x.checked = settings.sizeOptions.size4x;
       }
     }
   }

@@ -52,6 +52,14 @@ class DOMSelector {
 	}
 
 	/**
+	 * 프리셋 선택 셀렉팅 (너비 프리셋 등)
+	 * @returns {Element|null}
+	 */
+	static widthPreset() {
+		return this.byData('target', 'width-preset');
+	}
+
+	/**
 	 * 특정 타입의 컴포넌트 셀렉팅
 	 * @param {string} componentType - 컴포넌트 타입
 	 * @param {string} type - 타입명
@@ -90,7 +98,7 @@ class DOMSelector {
 
 	/**
 	 * 사이즈 옵션 체크박스 셀렉팅
-	 * @param {string} size - 사이즈 (1x, 2x, 3x)
+	 * @param {string} size - 사이즈 (1x, 1_5x, 2x, 3x, 4x)
 	 * @returns {Element|null} 사이즈 체크박스
 	 */
 	static sizeOption(size) {

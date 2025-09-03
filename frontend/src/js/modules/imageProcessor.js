@@ -240,20 +240,39 @@ export class ImageProcessor {
   async processImageMultipleSizes(file, sizes, options = {}) {
     const results = [];
 
+    // 원본 메타데이터를 가져와 업스케일 방지 (base*multiplier가 원본을 넘지 않도록 클램프)
+    let originalWidth = null;
+    let originalHeight = null;
+    try {
+      const meta = await this.getImageMetadata(file);
+      originalWidth = meta.width;
+      originalHeight = meta.height;
+    } catch (_) {
+      // 메타데이터를 얻지 못한 경우에도 동작은 하되, 업스케일 방지는 생략
+    }
+
     for (const size of sizes) {
       try {
+        // 요청된 base 크기에 배율을 곱한 목표값 계산 후, 원본 크기를 넘지 않도록 클램프
+        const targetMaxWidth = options.maxWidth
+          ? (originalWidth ? Math.min(options.maxWidth * size, originalWidth) : options.maxWidth * size)
+          : null;
+        const targetMaxHeight = options.maxHeight
+          ? (originalHeight ? Math.min(options.maxHeight * size, originalHeight) : options.maxHeight * size)
+          : null;
+
         const sizeOptions = {
           ...options,
-          maxWidth: options.maxWidth ? options.maxWidth * size : null,
-          maxHeight: options.maxHeight ? options.maxHeight * size : null
+          maxWidth: targetMaxWidth,
+          maxHeight: targetMaxHeight
         };
 
         const blob = await this.processImage(file, sizeOptions);
         results.push({
           size: size,
           blob: blob,
-          width: options.maxWidth ? options.maxWidth * size : null,
-          height: options.maxHeight ? options.maxHeight * size : null
+          width: targetMaxWidth,
+          height: targetMaxHeight
         });
       } catch (error) {
         console.error(`사이즈 ${size}x 처리 중 오류:`, error);

@@ -260,6 +260,9 @@ export class ImageGeneratorApp {
 
       // 업로드 직후 자동 제안: 웹 최적화 기준 크기 + 배율 옵션
       await this.suggestOptimizedSizes(file);
+
+      // 제안된 크기에 맞춰 즉시 처리하여 processed 미리보기와 정보 갱신
+      await this.processImage();
     } catch (error) {
       console.error('파일 로드 중 오류:', error);
       this.uiManager.showErrorMessage(error.message);

@@ -1,0 +1,103 @@
+.workspace-toolbar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: $spacing-md 0 $spacing-lg 0;
+  padding: $spacing-sm $spacing-md;
+  background: linear-gradient(180deg, rgba($primary-color, 0.06) 0%, rgba($secondary-color, 0.06) 100%);
+  border: 1px solid rgba($primary-color, 0.15);
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+}
+
+.toolbar-group {
+  display: inline-flex;
+  gap: $spacing-xs;
+  align-items: center;
+  padding: $spacing-xs;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e9ecef;
+  border-radius: $border-radius-md;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 28px;
+  background: #e5e7eb;
+  margin: 0 $spacing-sm;
+}
+
+.toolbar-title {
+  font-size: $font-size-sm;
+  font-weight: 700;
+  color: $text-primary;
+  margin-right: $spacing-xs;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.workspace-toolbar .btn {
+  font-size: $font-size-sm;
+  padding: $spacing-xs $spacing-sm;
+  min-width: 120px;
+  border-radius: $border-radius-sm;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-size: $font-size-xs;
+  font-weight: 700;
+  border: 1px solid transparent;
+
+  &.on {
+    color: #0f5132;
+    background: #d1e7dd;
+    border-color: #badbcc;
+  }
+
+  &.off {
+    color: #664d03;
+    background: #fff3cd;
+    border-color: #ffecb5;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #eef2ff;
+  color: $primary-color;
+  border: 1px solid rgba($primary-color, 0.25);
+  border-radius: 9999px;
+  font-size: $font-size-xs;
+  font-weight: 700;
+}
+
+@media (max-width: $breakpoint-md) {
+  .workspace-toolbar {
+    justify-content: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm;
+  }
+
+  .toolbar-group {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .workspace-toolbar .btn {
+    flex: 1;
+    min-width: 0;
+  }
+}
+

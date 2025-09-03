@@ -3,10 +3,11 @@
   margin: 0 auto;
   background: white;
   border-radius: $border-radius-lg;
-  box-shadow: $shadow-xl;
-  overflow: hidden;
+  box-shadow: $shadow-lg;
+  overflow: visible;
+  isolation: isolate; // 새 쌓임맥락으로 라운드/그림자 이슈 줄임
 }
 
 .main-content {
-  padding: $spacing-lg;
+  padding: $spacing-md;
 }

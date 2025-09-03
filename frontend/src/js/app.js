@@ -39,6 +39,9 @@ export class ImageGeneratorApp {
 
     // 초기 버튼 상태 설정
     this.updateButtonStates();
+
+    // 초기 툴바 상태 설정
+    await this.updateToolbarStatus();
   }
 
 
@@ -440,6 +443,8 @@ export class ImageGeneratorApp {
   // 작업물 저장
   async saveWork() {
     await this.workModalManager.saveWork();
+    // 저장 후 툴바 상태 갱신
+    await this.updateToolbarStatus();
   }
 
   // 작업물 목록 모달 표시
@@ -506,6 +511,8 @@ export class ImageGeneratorApp {
       this.updateButtonStates();
 
       this.uiManager.showSuccessMessage('작업물을 불러왔습니다.');
+      // 불러오기 후 툴바 상태 갱신
+      await this.updateToolbarStatus();
     } catch (error) {
       console.error('작업물 불러오기 실패:', error);
       this.uiManager.showErrorMessage('작업물을 불러오는 중 오류가 발생했습니다. 이미지 데이터가 손상되었을 수 있습니다.');
@@ -524,6 +531,8 @@ export class ImageGeneratorApp {
         this.uiManager.showSuccessMessage('작업물이 삭제되었습니다.');
         // 목록 새로고침
         await this.showWorkListModal();
+        // 툴바 상태 갱신
+        await this.updateToolbarStatus();
       } else {
         this.uiManager.showErrorMessage('작업물 삭제에 실패했습니다.');
       }
@@ -548,6 +557,9 @@ export class ImageGeneratorApp {
     this.uiManager.showInfoMessage(
       this.autoSaveEnabled ? '자동 저장이 활성화되었습니다.' : '자동 저장이 비활성화되었습니다.'
     );
+
+    // 툴바 배지 갱신
+    this.uiManager.setAutoSaveBadge(this.autoSaveEnabled);
   }
 
   // 모든 작업물 삭제
@@ -556,6 +568,8 @@ export class ImageGeneratorApp {
       const success = await this.workManager.clearAllWorks();
       if (success) {
         this.uiManager.showSuccessMessage('모든 작업물이 삭제되었습니다.');
+        // 툴바 상태 갱신
+        await this.updateToolbarStatus();
       } else {
         this.uiManager.showErrorMessage('작업물 삭제에 실패했습니다.');
       }
@@ -571,6 +585,17 @@ export class ImageGeneratorApp {
 
     // 크롭 버튼 텍스트 업데이트
     this.updateCropButtonText();
+  }
+
+  // 툴바 상태 갱신 (자동저장 배지, 작업물 개수)
+  async updateToolbarStatus() {
+    try {
+      this.uiManager.setAutoSaveBadge(this.autoSaveEnabled);
+      const works = await this.workManager.getWorkList();
+      this.uiManager.setWorksCount(works.length);
+    } catch (e) {
+      // 무시
+    }
   }
 }
 

@@ -3,7 +3,7 @@
 // 기본 모바일 스타일 (320px 이상)
 @media (min-width: 320px) {
   body {
-    padding: $spacing-xs;
+    padding: $spacing-sm;
   }
 
   .container {
@@ -56,51 +56,35 @@
     }
   }
 
-  .preview-image-container {
-    height: 250px;
-  }
+  .preview-image-container { height: 240px; }
 
   .zoom-controls {
     flex-wrap: wrap;
-    gap: $spacing-xs;
-    padding: $spacing-sm;
+    gap: 4px;
+    padding: 4px 6px;
 
     .zoom-btn {
-      width: 32px;
-      height: 32px;
-      font-size: $font-size-sm;
+      width: 26px;
+      height: 26px;
+      font-size: 0.8rem;
     }
 
     .zoom-level {
-      min-width: 50px;
-      font-size: $font-size-xs;
+      min-width: 44px;
+      font-size: 0.7rem;
+      padding: 2px 4px;
     }
   }
 
-  .controls-section {
-    padding: $spacing-md;
-    margin-bottom: $spacing-md;
-  }
+  .controls-section { padding: $spacing-sm; margin-bottom: $spacing-sm; }
 
-  .controls-grid {
-    grid-template-columns: 1fr;
-    gap: $spacing-sm;
-  }
+  .controls-grid { grid-template-columns: 1fr; gap: 6px; }
 
-  .control-group {
-    padding: $spacing-sm;
-
-    label {
-      font-size: $font-size-xs;
-    }
-
-    select,
-    input[type="range"],
-    input[type="number"] {
-      padding: $spacing-xs;
-      font-size: $font-size-xs;
-    }
-  }
+  .control-group { padding: 6px; }
+  .control-group label { font-size: 0.75rem; }
+  .control-group select,
+  .control-group input[type="range"],
+  .control-group input[type="number"] { padding: 4px 6px; font-size: 0.75rem; }
 
   .action-buttons {
     flex-direction: column;
@@ -268,9 +252,7 @@
     }
   }
 
-  .preview-image-container {
-    height: 350px;
-  }
+  .preview-image-container { height: 300px; }
 
   .zoom-controls {
     gap: $spacing-md;
@@ -439,9 +421,7 @@
     }
   }
 
-  .preview-image-container {
-    height: 320px;
-  }
+  .preview-image-container { height: 320px; }
 
   .controls-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

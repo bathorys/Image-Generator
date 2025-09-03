@@ -60,6 +60,10 @@ export class UIManager {
       autoSaveBtn: DOMSelector.action('toggle-auto-save'),
       clearWorksBtn: DOMSelector.action('clear-works'),
 
+      // 툴바 배지/칩
+      autosaveBadge: DOMSelector.target('autosave-badge'),
+      worksCountChip: DOMSelector.target('works-count-chip'),
+
       // 크롭 섹션
       cropSection: DOMSelector.component('crop-section'),
       cropImage: DOMSelector.target('crop-image'),
@@ -415,6 +419,22 @@ export class UIManager {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // 자동저장 배지 상태 갱신
+  setAutoSaveBadge(isOn) {
+    const badge = this.elements.autosaveBadge;
+    if (!badge) return;
+    badge.textContent = `자동저장: ${isOn ? 'ON' : 'OFF'}`;
+    badge.classList.toggle('on', !!isOn);
+    badge.classList.toggle('off', !isOn);
+  }
+
+  // 작업물 개수 칩 갱신
+  setWorksCount(count) {
+    const chip = this.elements.worksCountChip;
+    if (!chip) return;
+    chip.textContent = `작업물 ${count}`;
   }
 
   // 크롭 정보 업데이트

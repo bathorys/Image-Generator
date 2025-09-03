@@ -1,6 +1,6 @@
 .preview-section {
   display: none;
-  margin-top: $spacing-lg;
+  margin-top: $spacing-md;
   animation: fadeInUp 0.5s ease;
 }
 
@@ -17,7 +17,7 @@
 
 .preview-container {
   display: flex;
-  gap: $spacing-lg;
+  gap: $spacing-md;
   margin-bottom: $spacing-md;
   align-items: flex-start;
 
@@ -31,7 +31,7 @@
   flex: 1;
   border: 2px solid #e9ecef;
   border-radius: $border-radius-lg;
-  padding: $spacing-md;
+  padding: $spacing-sm;
   text-align: center;
   position: relative;
   transition: all $transition-base;
@@ -62,7 +62,7 @@
   }
 
   h3 {
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-sm;
     color: $text-primary;
     font-size: $font-size-base;
     font-weight: 600;
@@ -108,8 +108,8 @@
 
 // 이미지 정보 스타일 개선
 .image-info {
-  margin-top: $spacing-md;
-  padding: $spacing-md;
+  margin-top: $spacing-sm;
+  padding: $spacing-sm;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: $border-radius-md;
   text-align: left;
@@ -164,9 +164,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: $spacing-sm;
-  margin: $spacing-md 0;
-  padding: $spacing-sm;
+  gap: $spacing-xs;
+  margin: $spacing-sm 0;
+  padding: 6px 8px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: $border-radius-md;
   border: 1px solid #e9ecef;
@@ -174,13 +174,13 @@
 }
 
 .zoom-btn {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border: 2px solid $primary-color;
   background: white;
   color: $primary-color;
   border-radius: 50%;
-  font-size: $font-size-base;
+  font-size: $font-size-sm;
   font-weight: bold;
   cursor: pointer;
   transition: all $transition-base;
@@ -210,14 +210,14 @@
 }
 
 .zoom-level {
-  font-size: $font-size-sm;
+  font-size: $font-size-xs;
   font-weight: 600;
   color: $text-primary;
-  min-width: 60px;
+  min-width: 50px;
   text-align: center;
   font-family: 'Courier New', monospace;
   background: white;
-  padding: $spacing-xs $spacing-sm;
+  padding: 2px 6px;
   border-radius: $border-radius-sm;
   border: 1px solid #e9ecef;
 }
@@ -228,7 +228,7 @@
   display: block;
   overflow: hidden;
   width: 100%;
-  height: 350px;
+  height: 320px;
   margin: $spacing-sm 0;
   cursor: grab;
   transition: transform $transition-base;
@@ -253,139 +253,5 @@
     background: rgba($primary-color, 0.05);
   }
 }
-
-// 크롭 섹션 스타일 개선
-.crop-section {
-  display: none;
-  margin-top: $spacing-lg;
-  text-align: center;
-  background: white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-lg;
-  box-shadow: $shadow-md;
-  border: 1px solid #e9ecef;
-
-  h3 {
-    color: $text-primary;
-    margin-bottom: $spacing-xs;
-    font-size: $font-size-base;
-    font-weight: 600;
-  }
-
-  p {
-    color: $text-secondary;
-    margin-bottom: $spacing-md;
-    font-size: $font-size-sm;
-  }
-}
-
-.crop-container {
-  position: relative;
-  display: inline-block;
-  border: 3px solid #e9ecef;
-  border-radius: $border-radius-md;
-  overflow: hidden;
-  margin: $spacing-md 0;
-  cursor: crosshair;
-  box-shadow: $shadow-md;
-  background: #f8f9fa;
-
-  &:hover {
-    border-color: $primary-color;
-  }
-}
-
-.crop-image {
-  max-width: 100%;
-  max-height: 400px;
-  display: block;
-  transition: all $transition-base;
-}
-
-.crop-overlay {
-  position: absolute;
-  border: 2px solid $primary-color;
-  background: rgba($primary-color, 0.1);
-  cursor: move;
-  display: none;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-
-  &.active {
-    display: block;
-  }
-}
-
-.crop-handle {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: $primary-color;
-  border: 2px solid white;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: $shadow-sm;
-  transition: all $transition-base;
-
-  &:hover {
-    transform: scale(1.2);
-    box-shadow: $shadow-md;
-  }
-
-  // 모서리 핸들
-  &.nw {
-    top: -6px;
-    left: -6px;
-    cursor: nw-resize;
-  }
-
-  &.ne {
-    top: -6px;
-    right: -6px;
-    cursor: ne-resize;
-  }
-
-  &.sw {
-    bottom: -6px;
-    left: -6px;
-    cursor: sw-resize;
-  }
-
-  &.se {
-    bottom: -6px;
-    right: -6px;
-    cursor: se-resize;
-  }
-
-  // 중간 핸들
-  &.n {
-    top: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    cursor: n-resize;
-  }
-
-  &.s {
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    cursor: s-resize;
-  }
-
-  &.e {
-    top: 50%;
-    right: -6px;
-    transform: translateY(-50%);
-    cursor: e-resize;
-  }
-
-  &.w {
-    top: 50%;
-    left: -6px;
-    transform: translateY(-50%);
-    cursor: w-resize;
-  }
-}
-
 
 

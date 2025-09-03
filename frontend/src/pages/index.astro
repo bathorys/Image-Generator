@@ -27,12 +27,24 @@ import Snackbar from '@/components/Snackbar.astro';
 					<input type="file" data-target="file-input" class="file-input" accept="image/*" />
 				</div>
 
-				<!-- 통합된 작업물 관리 영역 -->
-				<div class="work-actions" data-component="work-actions">
-					<button class="btn btn-info" data-action="save-work" title="현재 작업물을 저장합니다">💾 작업물 저장</button>
-					<button class="btn btn-info" data-action="load-work" title="저장된 작업물 목록을 불러옵니다">📂 작업물 불러오기</button>
-					<button class="btn btn-warning" data-action="toggle-auto-save" title="자동 저장을 토글합니다">🔄 자동저장</button>
-					<button class="btn btn-danger" data-action="clear-works" title="모든 저장된 작업물을 삭제합니다">🗑️ 작업물 삭제</button>
+				<!-- 작업물 관리 툴바 -->
+				<div class="workspace-toolbar" data-component="work-actions">
+					<div class="toolbar-group">
+						<span class="toolbar-title">작업물</span>
+						<button class="btn btn-info" data-action="save-work" title="현재 작업물을 저장합니다">💾 저장</button>
+						<button class="btn btn-info" data-action="load-work" title="저장된 작업물 목록을 불러옵니다">📂 불러오기</button>
+					</div>
+					<span class="toolbar-separator"></span>
+					<div class="toolbar-group">
+						<span class="toolbar-title">관리</span>
+						<button class="btn btn-warning" data-action="toggle-auto-save" title="자동 저장을 토글합니다">🔄 자동저장</button>
+						<button class="btn btn-danger" data-action="clear-works" title="모든 저장된 작업물을 삭제합니다">🗑️ 삭제</button>
+					</div>
+					<div class="toolbar-spacer"></div>
+					<div class="toolbar-group">
+						<span class="status-badge off" data-target="autosave-badge">자동저장: OFF</span>
+						<span class="chip" data-target="works-count-chip">작업물 0</span>
+					</div>
 				</div>
 
 				<div class="preview-section" data-component="preview-section">

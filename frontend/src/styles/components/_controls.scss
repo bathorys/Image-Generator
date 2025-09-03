@@ -1,7 +1,7 @@
 .controls-section {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: $border-radius-lg;
-  padding: $spacing-lg;
+  padding: $spacing-md;
   margin-bottom: $spacing-lg;
   border: 1px solid #e9ecef;
   box-shadow: $shadow-md;
@@ -21,9 +21,9 @@
 
 .controls-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: $spacing-md;
-  margin-bottom: $spacing-lg;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
 
   @media (max-width: $breakpoint-md) {
     grid-template-columns: 1fr;
@@ -34,9 +34,9 @@
 .control-group {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xs;
+  gap: 4px;
   background: white;
-  padding: $spacing-md;
+  padding: 4px;
   border-radius: $border-radius-md;
   border: 1px solid #e9ecef;
   transition: all $transition-base;
@@ -51,8 +51,8 @@
   label {
     font-weight: 600;
     color: $text-primary;
-    font-size: $font-size-sm;
-    margin-bottom: $spacing-xs;
+    font-size: 0.7rem;
+    margin-bottom: 2px;
     display: flex;
     align-items: center;
     gap: $spacing-xs;
@@ -66,10 +66,10 @@
   select,
   input[type="range"],
   input[type="number"] {
-    padding: $spacing-sm;
-    border: 2px solid #e9ecef;
+    padding: 4px 6px;
+    border: 1px solid #e9ecef;
     border-radius: $border-radius-md;
-    font-size: $font-size-sm;
+    font-size: $font-size-xs;
     transition: all $transition-base;
     background: white;
     font-family: inherit;
@@ -97,7 +97,7 @@
 
   input[type="range"] {
     padding: 0;
-    height: 8px;
+    height: 4px;
     background: linear-gradient(to right, #e9ecef 0%, #e9ecef 100%);
     border-radius: 4px;
     outline: none;
@@ -106,8 +106,8 @@
 
     &::-webkit-slider-thumb {
       appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 14px;
+      height: 14px;
       background: $primary-gradient;
       border-radius: 50%;
       cursor: pointer;
@@ -122,8 +122,8 @@
     }
 
     &::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
+      width: 14px;
+      height: 14px;
       background: $primary-gradient;
       border-radius: 50%;
       cursor: pointer;
@@ -139,14 +139,14 @@
 
     &::-webkit-slider-track {
       background: linear-gradient(to right, $primary-color 0%, $primary-color 50%, #e9ecef 50%, #e9ecef 100%);
-      border-radius: 4px;
-      height: 8px;
+      border-radius: 3px;
+      height: 4px;
     }
 
     &::-moz-range-track {
       background: linear-gradient(to right, $primary-color 0%, $primary-color 50%, #e9ecef 50%, #e9ecef 100%);
-      border-radius: 4px;
-      height: 8px;
+      border-radius: 3px;
+      height: 4px;
       border: none;
     }
   }
@@ -161,34 +161,34 @@
 
   small {
     color: $text-muted;
-    font-size: $font-size-xs;
-    margin-top: $spacing-xs;
-    line-height: 1.4;
-    background: rgba($info-color, 0.1);
-    padding: $spacing-xs $spacing-sm;
+    font-size: 0.65rem;
+    margin-top: 2px;
+    line-height: 1.35;
+    background: rgba($info-color, 0.08);
+    padding: 2px 4px;
     border-radius: $border-radius-sm;
-    border-left: 3px solid $info-color;
+    border-left: 2px solid $info-color;
   }
 
   // 슬라이더 값 표시
   span[id$="Value"] {
     font-weight: 600;
     color: $primary-color;
-    font-size: $font-size-xs;
+    font-size: 0.7rem;
     text-align: center;
-    background: rgba($primary-color, 0.1);
-    padding: $spacing-xs $spacing-sm;
+    background: rgba($primary-color, 0.08);
+    padding: 2px 4px;
     border-radius: $border-radius-sm;
-    margin-top: $spacing-xs;
+    margin-top: 2px;
     font-family: 'Courier New', monospace;
   }
 }
 
 .control-inline {
   display: grid;
-  grid-template-columns: 1fr 90px auto;
+  grid-template-columns: 1fr 72px auto;
   align-items: center;
-  gap: $spacing-sm;
+  gap: 4px;
 
   input[type="number"] {
     text-align: right;
@@ -330,14 +330,14 @@
   justify-content: center;
   flex-wrap: wrap;
   margin-top: $spacing-md;
-  padding: $spacing-sm;
-  border-top: 1px solid #e9ecef;
-  background: white;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 $border-radius-md $border-radius-md;
+  padding: $spacing-sm 0 0 0;
+  border-top: 1px dashed #e9ecef;
+  background: transparent;
+  position: static;
+  top: auto;
+  z-index: auto;
+  box-shadow: none;
+  border-radius: 0;
 
   @media (max-width: $breakpoint-md) {
     flex-direction: column;

@@ -12,7 +12,7 @@ html {
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: $primary-gradient;
+  background: var(--app-background);
   min-height: 100vh;
   padding: $spacing-lg;
   color: $text-primary;

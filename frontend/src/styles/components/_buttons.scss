@@ -33,7 +33,7 @@
     color: white;
 
     &:hover {
-      background: lighten($dark-color, 10%);
+      background: #495057; // tone-up for hover
     }
   }
 
@@ -42,7 +42,7 @@
     color: white;
 
     &:hover {
-      background: darken($success-color, 10%);
+      background: var(--color-success-600);
     }
   }
 
@@ -51,7 +51,7 @@
     color: $dark-color;
 
     &:hover {
-      background: darken($warning-color, 10%);
+      background: var(--color-warning-600);
     }
   }
 
@@ -60,7 +60,7 @@
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: darken($danger-color, 10%);
+      background-color: var(--color-danger-600);
     }
   }
 
@@ -69,7 +69,7 @@
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: darken($info-color, 10%);
+      background-color: var(--color-info-600);
     }
   }
 }
@@ -154,7 +154,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-lg $spacing-xl;
+  padding: $spacing-md $spacing-lg;
   background: $primary-gradient;
   color: white;
   position: relative;
@@ -178,7 +178,7 @@
 
 .work-modal-body,
 .work-save-modal-body {
-  padding: $spacing-xl;
+  padding: $spacing-lg;
   max-height: 60vh;
   overflow-y: auto;
   background: #fafbfc;
@@ -359,8 +359,8 @@
 .work-save-preview {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: $border-radius-lg;
-  padding: $spacing-lg;
-  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
   border: 1px solid #e9ecef;
 
   h4 {
@@ -408,8 +408,8 @@
 .privacy-footer {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-top: 1px solid #dee2e6;
-  margin-top: 3rem;
-  padding: 2rem 0;
+  margin-top: $spacing-xl;
+  padding: $spacing-lg 0;
 
   .privacy-content {
     max-width: $breakpoint-xl;
@@ -420,7 +420,7 @@
   .privacy-info {
     background: white;
     border-radius: $border-radius-lg;
-    padding: $spacing-xl;
+    padding: $spacing-lg;
     box-shadow: $shadow-md;
     border: 1px solid #e9ecef;
 

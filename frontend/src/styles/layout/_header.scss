@@ -1,7 +1,10 @@
 .header {
   background: $primary-gradient;
   color: white;
-  padding: $spacing-lg;
+  padding: $spacing-md $spacing-lg;
+  border-top-left-radius: $border-radius-lg;
+  border-top-right-radius: $border-radius-lg;
+  overflow: hidden;
   text-align: center;
 
   h1 {

@@ -56,6 +56,9 @@ export class SettingsManager {
         elements.jpegQualitySlider.value = v;
         if (elements.jpegQualityInput) elements.jpegQualityInput.value = v;
         if (elements.jpegQualityValue) elements.jpegQualityValue.textContent = v + '%';
+        // 트랙 채움 (백분율)
+        const p = ((v - 1) / 99) * 100;
+        elements.jpegQualitySlider.style.background = `linear-gradient(to right, var(--slider-fill, #667eea) 0%, var(--slider-fill, #667eea) ${p}%, #e9ecef ${p}%, #e9ecef 100%)`;
         this.lastValidJpegQuality = v;
         this.app.autoSaveWork();
         this.scheduleAutoProcess();
@@ -102,6 +105,9 @@ export class SettingsManager {
       elements.pngCompressionSlider.addEventListener('input', () => {
         elements.pngCompressionValue.textContent = elements.pngCompressionSlider.value;
         if (elements.pngCompressionInput) elements.pngCompressionInput.value = elements.pngCompressionSlider.value;
+        const v = parseInt(elements.pngCompressionSlider.value || '0', 10);
+        const p = Math.max(0, Math.min(100, (v / 9) * 100));
+        elements.pngCompressionSlider.style.background = `linear-gradient(to right, var(--slider-fill, #667eea) 0%, var(--slider-fill, #667eea) ${p}%, #e9ecef ${p}%, #e9ecef 100%)`;
         this.app.autoSaveWork();
         this.scheduleAutoProcess();
       });
@@ -143,6 +149,9 @@ export class SettingsManager {
       elements.webpQualitySlider.addEventListener('input', () => {
         elements.webpQualityValue.textContent = elements.webpQualitySlider.value + '%';
         if (elements.webpQualityInput) elements.webpQualityInput.value = elements.webpQualitySlider.value;
+        const v = parseInt(elements.webpQualitySlider.value || '1', 10);
+        const p = ((v - 1) / 99) * 100;
+        elements.webpQualitySlider.style.background = `linear-gradient(to right, var(--slider-fill, #667eea) 0%, var(--slider-fill, #667eea) ${p}%, #e9ecef ${p}%, #e9ecef 100%)`;
         this.app.autoSaveWork();
         this.scheduleAutoProcess();
       });
@@ -272,6 +281,36 @@ export class SettingsManager {
         const webpGroup = document.querySelector('[data-type="webp-quality"]');
         if (webpGroup) webpGroup.style.display = 'block';
         break;
+      case 'original': {
+        // 원본 이미지의 MIME/확장자 추론 후 해당 컨트롤 노출
+        const originalSrc = elements.originalImage?.src || '';
+        if (originalSrc.startsWith('data:image/')) {
+          if (originalSrc.startsWith('data:image/jpeg')) {
+            const jpegG = document.querySelector('[data-type="jpeg-quality"]');
+            if (jpegG) jpegG.style.display = 'block';
+          } else if (originalSrc.startsWith('data:image/png')) {
+            const pngG = document.querySelector('[data-type="png-compression"]');
+            if (pngG) pngG.style.display = 'block';
+          } else if (originalSrc.startsWith('data:image/webp')) {
+            const webpG = document.querySelector('[data-type="webp-quality"]');
+            if (webpG) webpG.style.display = 'block';
+          }
+        } else {
+          // 파일 경로에서 확장자 추론
+          const lower = originalSrc.toLowerCase();
+          if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) {
+            const jpegG = document.querySelector('[data-type="jpeg-quality"]');
+            if (jpegG) jpegG.style.display = 'block';
+          } else if (lower.endsWith('.png')) {
+            const pngG = document.querySelector('[data-type="png-compression"]');
+            if (pngG) pngG.style.display = 'block';
+          } else if (lower.endsWith('.webp')) {
+            const webpG = document.querySelector('[data-type="webp-quality"]');
+            if (webpG) webpG.style.display = 'block';
+          }
+        }
+        break;
+      }
     }
   }
 
@@ -311,6 +350,9 @@ export class SettingsManager {
       if (elements.jpegQualityInput) elements.jpegQualityInput.value = settings.jpegQuality;
       elements.jpegQualityValue.textContent = settings.jpegQuality + '%';
       this.lastValidJpegQuality = parseInt(settings.jpegQuality, 10) || 80;
+      const v = parseInt(settings.jpegQuality, 10) || 80;
+      const p = ((v - 1) / 99) * 100;
+      elements.jpegQualitySlider.style.background = `linear-gradient(to right, var(--slider-fill, #667eea) 0%, var(--slider-fill, #667eea) ${p}%, #e9ecef ${p}%, #e9ecef 100%)`;
     }
 
     // PNG 압축 설정
@@ -318,6 +360,9 @@ export class SettingsManager {
       elements.pngCompressionSlider.value = settings.pngCompression;
       elements.pngCompressionValue.textContent = settings.pngCompression;
       if (elements.pngCompressionInput) elements.pngCompressionInput.value = settings.pngCompression;
+      const v = parseInt(settings.pngCompression, 10) || 6;
+      const p = (v / 9) * 100;
+      elements.pngCompressionSlider.style.background = `linear-gradient(to right, var(--slider-fill, #667eea) 0%, var(--slider-fill, #667eea) ${p}%, #e9ecef ${p}%, #e9ecef 100%)`;
     }
 
     // WebP 품질 설정
@@ -325,6 +370,9 @@ export class SettingsManager {
       elements.webpQualitySlider.value = settings.webpQuality;
       if (elements.webpQualityInput) elements.webpQualityInput.value = settings.webpQuality;
       elements.webpQualityValue.textContent = settings.webpQuality + '%';
+      const v = parseInt(settings.webpQuality, 10) || 80;
+      const p = ((v - 1) / 99) * 100;
+      elements.webpQualitySlider.style.background = `linear-gradient(to right, var(--slider-fill, #667eea) 0%, var(--slider-fill, #667eea) ${p}%, #e9ecef ${p}%, #e9ecef 100%)`;
     }
 
     // WebP 투명도 설정

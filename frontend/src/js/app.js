@@ -250,7 +250,7 @@ export class ImageGeneratorApp {
       this.uiManager.showPreview();
 
       // 원본 이미지 정보 업데이트
-      this.imageInfoManager.updateOriginalImageInfo(file);
+      this.imageInfoManager.updateOriginalImageInfo(dataURL);
 
       // 크롭 버튼 텍스트 업데이트
       this.updateCropButtonText();

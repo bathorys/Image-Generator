@@ -184,6 +184,21 @@
   }
 }
 
+.control-inline {
+  display: grid;
+  grid-template-columns: 1fr 90px auto;
+  align-items: center;
+  gap: $spacing-sm;
+
+  input[type="number"] {
+    text-align: right;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr 80px auto;
+  }
+}
+
 .checkbox-group {
   display: flex;
   align-items: center;
